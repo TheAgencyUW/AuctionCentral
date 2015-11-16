@@ -5,7 +5,9 @@ import java.io.FileNotFoundException;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 public class Calendar {
 
@@ -30,15 +32,28 @@ public class Calendar {
 	private String[] myMonth = new String[12];
 	/** A string that holds the different days of the week.*/
 	private String[] myDays = new String[7];
+	/** A map that holds a list of all the auctions by YearMonth.*/
+	private Map<YearMonth, ArrayList<String>> myAuctionListByYearMonth;
+	/** A map that holds a list of all the auctions by the different organization.*/
+	private Map<String, ArrayList<String>> myAuctionsByOrg;
 	
 	public Calendar() {
 		myCurrentAuctions = new ArrayList<Auction>();
+		myAuctionListByYearMonth = new TreeMap<YearMonth, ArrayList<String>>();
 		myInput = null;
 		
 		fillMonth();
 		fillDays();
 	}
 
+	public void addAuction(Auction theCurentAuction) throws HasMaxAuctionsExceptions {
+		if (hasMaxAuctions()) {
+			throw new HasMaxAuctionsExceptions("");
+		} else if (!minDaysBetweenOrgAuctions(theCurentAuction.getMyOrg(), )) {
+			
+		}
+	}
+	
 	/**
 	 * Checks to see if there is already the max amount of auctions that are in
 	 * the future.
@@ -78,12 +93,12 @@ public class Calendar {
 	 * Creates a string representation of the current month with the different
 	 * auctions put in.
 	 * 
-	 * @param theYearMonth
-	 * @return
+	 * @param theYearMonth is the year and month that you want to view.
+	 * @return a string representation of the month calendar.
 	 */
 	public String getAnyMonthCalendarView(YearMonth theYearMonth) {
 		StringBuilder sb = new StringBuilder();
-		
+		//needs to be done.
 		return sb.toString();
 	}
 	
@@ -91,7 +106,7 @@ public class Calendar {
 	 * Creates a string representation of the current month with the different
 	 * auctions put in.
 	 * 
-	 * @return 
+	 * @return a string representation of the month calendar.
 	 */
 	public String getCurrentMonthCalendarView() {
 		return getAnyMonthCalendarView(YearMonth.now());
