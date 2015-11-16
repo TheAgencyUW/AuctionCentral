@@ -4,13 +4,14 @@ package AuctionCentral;
  */
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Auction {
 	private String myName;
 	private String myOrg;
 	private String myStartTime;
 	private String myEndTime;
-	private String myDate;
+	private Date myDate;
 	private ArrayList<Items> myItems = new ArrayList<Items>();
 	private int ItemID;
 	
@@ -21,7 +22,7 @@ public class Auction {
 	 * @param startTime
 	 * @param endTime
 	 */
-	public Auction(String org, String date, String startTime, String endTime){
+	public Auction(String org, Date date, String startTime, String endTime){
 		myOrg = org;
 		myStartTime = startTime;
 		myEndTime = endTime;
@@ -147,13 +148,13 @@ public class Auction {
 	/**
 	 * @return the myDate
 	 */
-	public String getMyDate() {
+	public Date getMyDate() {
 		return myDate;
 	}
 	/**
 	 * @param myDate the myDate to set
 	 */
-	public void setMyDate(String myDate) {
+	public void setMyDate(Date myDate) {
 		this.myDate = myDate;
 	}
 	
