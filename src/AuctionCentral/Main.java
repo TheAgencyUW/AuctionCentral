@@ -1,7 +1,7 @@
 /**
  * 
  */
-package users;
+package AuctionCentral;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -54,7 +54,7 @@ public class Main {
 			CheckInput(input);
 		}
 		myCalendar = new Calendar();
-		myUserList.
+		//myUserList.
 	}
 
 	/**

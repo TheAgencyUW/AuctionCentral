@@ -1,4 +1,4 @@
-package users;
+package AuctionCentral;
 
 import java.util.ArrayList;
 

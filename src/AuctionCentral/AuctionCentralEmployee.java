@@ -1,7 +1,7 @@
 /**
  * 
  */
-package users;
+package AuctionCentral;
 
 import java.util.Calendar;
 import java.util.Scanner;

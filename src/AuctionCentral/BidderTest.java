@@ -1,4 +1,4 @@
-package users;
+package AuctionCentral;
 /*
  * Junit testing for bidder
  * 
