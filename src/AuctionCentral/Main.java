@@ -15,10 +15,10 @@ import java.util.TreeMap;
 public class Main {
 
 	// Class variables
-	/** Used to store a calendar that holds the different auction.*/
-	// private static Calendar myCalendar
+
 	/** Used to store the current user.*/
-	// private static Users myCurrentUser;
+	private static String myCurrentUser;
+	private static String myCurrentUserRole;
 	/** A map to store the username as a key and their role as a value.*/
 	private static Map<String, String> myUserList;
 	/** A calendar to hold all the different auctions and used to display them.*/
@@ -32,29 +32,38 @@ public class Main {
 	private static Scanner myIn;
 	/** Used to tell if the user has entered a correct user name.*/
 	private static boolean myChecked;
-	
+
+
+
 	public static void main(String[] args) {
 		myOut = new PrintStream(System.out, true);
 		myUserList = new TreeMap<String, String>();
 		myChecked = false;
-		
+
 		LoadCurrentUsers();
 		RunProgram();
 	}
+
+
 
 	/**
 	 * A method to run the program AuctionCentral.
 	 */
 	private static void RunProgram() {
-		myIn = new Scanner(System.in);
-		PrintWelcome();
-		String input = "";
-		while (!myChecked) {
-			input = myIn.next();
-			CheckInput(input);
-		}
 		myCalendar = new Calendar();
-		//myUserList.
+		loadCalendar();
+		myIn = new Scanner(System.in);
+		while(true){	
+			PrintWelcome();
+
+			while (!myChecked) {
+				String input = myIn.next();
+				CheckInput(input);
+			}
+
+			createUser();
+
+		}
 	}
 
 	/**
@@ -67,6 +76,8 @@ public class Main {
 			System.exit(0);
 		} else {
 			if (myUserList.containsKey(theInput)) {
+				myCurrentUser = theInput;
+				myCurrentUserRole = myUserList.get(myCurrentUser);
 				myChecked = true;
 			} else {
 				myOut.println("I am sorry, but " + theInput + " is not an "
@@ -74,7 +85,7 @@ public class Main {
 				myOut.print("Please enter your username or Q to quit: ");
 			}
 		}
-		
+
 	}
 
 	/**
@@ -83,7 +94,23 @@ public class Main {
 	 */
 	private static void PrintWelcome() {
 		myOut.println("Welcome to AuctionCentral");
-		myOut.print("Please enter your username or Q to quit: ");
+		myOut.print("Please enter your username or Q to quit: \n");
+	}
+
+
+	public static void createUser(){
+		myChecked = false;
+		switch(myCurrentUserRole){
+		case "bidder" : Bidder bidder = new Bidder(myCalendar, myCurrentUser);
+						bidder.bidderInterface();
+						break;
+		case "npo" 	  : NonProfitOrganizationStaff npo = new NonProfitOrganizationStaff(myCalendar, myCurrentUser);
+						npo.staffInterface();
+						break;
+		case "ace"    : AuctionCentralEmployee ace = new AuctionCentralEmployee(myCalendar, myCurrentUser);
+		ace.employeeInterface();
+			break;
+		}
 	}
 
 	/**
@@ -93,18 +120,23 @@ public class Main {
 	private static void LoadCurrentUsers() {
 		String user, type;
 		try {
-			myIn = new Scanner(new File("Users"));
-			while (myIn.hasNextLine()) {
+			myIn = new Scanner(new File("Users.txt"));
+			while (myIn.hasNext()) {
 				user = myIn.next();
 				type = myIn.next();
-				user = user.substring(0, user.lastIndexOf(';'));
+				type = type.substring(0, type.lastIndexOf(";"));
 				myUserList.put(user, type);
 			}
 			myIn.close();
 		} catch (FileNotFoundException e) {
-			myOut.println("No months found");
+			myOut.println("No user found");
 		}
-		
+
+	}
+	
+	private static void loadCalendar(){
+		myCalendar.addAuction(new Auction("auction1", "10/10/2010", "8am", "1pm"));
+		myCalendar.addAuction(new Auction("auction2", "11/11/2011", "8am", "1pm"));
 	}
 
 }
