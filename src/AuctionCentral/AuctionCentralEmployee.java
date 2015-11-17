@@ -1,7 +1,7 @@
 /**
  * 
  */
-package AuctionCentral;
+package users;
 
 import java.util.Calendar;
 import java.util.Scanner;
@@ -15,7 +15,7 @@ public class AuctionCentralEmployee {
 	/**
 	 * Holds the calendar for use by ACE.
 	 */
-	private Calendar myCalendar;
+	private users.Calendar myCalendar;
 	
 	/**
 	 * Holds the name for the employee.
@@ -30,7 +30,7 @@ public class AuctionCentralEmployee {
 	/**
 	 * 
 	 */
-	public AuctionCentralEmployee(Calendar calendar, String name) {
+	public AuctionCentralEmployee(users.Calendar calendar, String name) {
 		myCalendar = calendar;
 		employeeName = name;
 	}

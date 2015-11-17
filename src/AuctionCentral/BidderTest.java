@@ -1,55 +1,71 @@
 package AuctionCentral;
-/*
- * Junit testing for bidder
- * 
- * Phillip M
- */
 
 import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 
 public class BidderTest 
 {
-	private Bidder bidderTest;
-	private Auction auctionTest;
-	private Items itemTest;
-
-	public void setUp() throws Exception
+	private Bidder bid;
+	private Calendar cal;
+	private String name;
+	private int itemNum;
+	private String auc;
+	private Items item;
+	
+	@Before
+	public void setUp() throws Exception 
 	{
-		bidderTest = new Bidder();
-		auctionTest = new Auction(null, null, null, null);
-		itemTest = new Items(0, null, null, 0);
+		bid = new Bidder(cal, name);
+		itemNum = 0001;
+		auc = "Auction";
+		item = new Items(itemNum, "book", "This is a book", 10.00);
+		
+	}
+	
+	public void testBidder()
+	{
+		bid = new Bidder(cal, "Bob");
+		assertNotNull("Bidder creation fail, no calendar", cal);
+		assertNotNull("Bidder creation fail, no name", "Bob");
+	}
+	@Test
+	public void testChangeBid()
+	{
+		bid.enterBid(itemNum, auc, 50);
+		bid.changeBid(itemNum, auc, 75);
+		assertEquals("Error, bid was not changed", 75.00, 50.00);
+	}
+	@Test
+	public void testCancelBid()
+	{
+		bid.enterBid(itemNum, auc, 50);
+		bid.cancelBid(itemNum, auc);
+		assertEquals("Error, bid was not cancelled", null, 50.00);
 	}
 	
 	@Test
-	public void testEnterBid() {
-		assertEquals("Test Failed", 1.00, 0.00, 2.50);
+	public void testEnterBid()
+	{	
+		bid.enterBid(itemNum, auc, 50);
+		assertEquals("Error, bid was not entered", 50.00, null);
+		
 	}
 
 	@Test
-	public void testChangeBid() {
-		assertEquals("Test Failed", 1.00, 1.50, 2.50);
+	public void testChangeOnHigherBid()
+	{
+		bid.enterBid(itemNum, auc, 50.00);
+		bid.changeBid(itemNum, auc, 40.00);
+		assertEquals("Bid is lower than current bid", item.getMinBid(), 40.00);
 	}
-
+	
 	@Test
-	public void testCancelBid() {
-		assertEquals("Test Failed", 0.00, 1.00, 2.50);
-	}
-
-	@Test
-	public void testViewCurrentBids() {
-		assertEquals("Test Failed", bidderTest.viewCurrentBids(), null);
-	}
-
-	@Test
-	public void testViewCurrentAuctions() {
-		assertEquals("Test Failed", bidderTest.viewCurrentAuctions(auctionTest), null);
-	}
-
-	@Test
-	public void testViewItem() {
-		assertEquals("Test Failed", bidderTest.viewItem(itemTest), null);
+	public void placeOnLowerThanOrig()
+	{
+		bid.enterBid(itemNum, auc, 5);
+		assertEquals("Bid is lower than the Minimum Starting Bid", item.getMinBid(), 5.00);
 	}
 
 }

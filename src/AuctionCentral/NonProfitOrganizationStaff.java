@@ -1,7 +1,7 @@
 /**
  * 
  */
-package AuctionCentral;
+package users;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -17,7 +17,7 @@ public class NonProfitOrganizationStaff {
 	/**
 	 * Holds the calendar.
 	 */
-	private Calendar myCalendar;
+	private users.Calendar myCalendar;
 	
 	/**
 	 * Holds the NPO name.
@@ -33,12 +33,7 @@ public class NonProfitOrganizationStaff {
 	 * Holds the representative name.
 	 */
 	private String myRepresentativeName;
-	
-	/**
-	 * Holds the auction name.
-	 */
-	String myAuctionName;
-	
+		
 	/**
 	 * Holds the auction date.
 	 */
@@ -115,7 +110,7 @@ public class NonProfitOrganizationStaff {
 	 * @param org
 	 * @param rep
 	 */
-	public NonProfitOrganizationStaff(Calendar calendar, String org, String rep) {
+	public NonProfitOrganizationStaff(users.Calendar calendar, String org, String rep) {
 		myCalendar = calendar;
 		myOrganizationName = org;
 		myRepresentativeName = rep;
@@ -129,7 +124,7 @@ public class NonProfitOrganizationStaff {
 	/**
 	 * The interface for the ACE.
 	 */
-	public void employeeInterface(){
+	public void organizationInterface(){
 		int input;
 		while(true){
 			System.out.println("Welcome " + myRepresentativeName);

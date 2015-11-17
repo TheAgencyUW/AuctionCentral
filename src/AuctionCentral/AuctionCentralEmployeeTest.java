@@ -1,4 +1,4 @@
-package AuctionCentral;
+package users;
 
 import static org.junit.Assert.*;
 
@@ -6,13 +6,10 @@ import org.junit.Test;
 
 public class AuctionCentralEmployeeTest {
 
+	AuctionCentralEmployee mine;
 	@Test
 	public void test() {
-		fail("Not yet implemented");
-	}
-	
-	@Test
-	public void addItemTest(Item i) {
-		asserEquals(true);
+		Calendar calendar = new Calendar();
+		mine = new AuctionCentralEmployee(calendar, "Joe");
 	}
 }
