@@ -1,12 +1,16 @@
-package AuctionCentral;
+package AuctionCentral.test;
 
 /**
  * @author Tan Pham
  */
 import static org.junit.Assert.*;
 
+import java.util.GregorianCalendar;
+
 import org.junit.Before;
 import org.junit.Test;
+
+import AuctionCentral.Auction;
 
 public class AuctionTest {
 	
@@ -14,13 +18,13 @@ public class AuctionTest {
 
 	@Before
 	public void setUp() throws Exception {
-		test = new Auction("testOrg", "10/10/2010", "9am", "1pm");
+		test = new Auction("testOrg", new GregorianCalendar(2014, java.util.Calendar.FEBRUARY, 11).getTime(), "9am", "1pm");
 		test.addItem("Item1", "test item 1", 3.5);
 	}
 
 	@Test
 	public void testAuction() {
-		test = new Auction("testOrg", "10/10/2010", "9am", "1pm");
+		test = new Auction("testOrg", new GregorianCalendar(2014, java.util.Calendar.FEBRUARY, 11).getTime(), "9am", "1pm");
 		assertNotNull("constructor fails: cannot create item.", test);
 	}
 
@@ -105,8 +109,8 @@ public class AuctionTest {
 
 	@Test
 	public void testSetMyDate() {
-		test.setMyDate("11/11/2011");
-		assertEquals("set date fails", test.getMyDate(), "11/11/2011");
+		test.setMyDate( new GregorianCalendar(2014, java.util.Calendar.FEBRUARY, 11).getTime());
+		assertEquals("set date fails", test.getMyDate(), new GregorianCalendar(2014, java.util.Calendar.FEBRUARY, 11).getTime());
 	}
 
 }
