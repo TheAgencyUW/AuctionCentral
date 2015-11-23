@@ -28,7 +28,7 @@ public class Items {
 		this.minBid = minBid;
 		this.id = id;	
 	}
-	
+
 	public String toString(){
 		return "ID: " + id + ", Item name: " + myName + ", Minimum bid: " + minBid + ", Item description: " + myDescription;
 	}
@@ -39,20 +39,19 @@ public class Items {
 	 * @param bidder
 	 * @param bidValue
 	 */
-	public boolean addBid(String bidder, double bidValue){
-		boolean bidderExist = false;
+	public void addBid(String bidder, double bidValue) throws PlaceBidException{
+		if(bidValue<minBid){
+			throw new PlaceBidException("Your bid cannot be less than minimum bid.");
+		}
 		for(int i = 0; i <bidList.size(); i++){
 			if(bidList.get(i).getBidder() == bidder){
-				System.out.println("A bidder cannot place more than one bid on the same item. \n"
+				throw new PlaceBidException("A bidder cannot place more than one bid on the same item. \n"
 						+ "If you want to change you bid value, please select edit bid option in your bided list.");
-				bidderExist = true;
 			}			
 		}
-		if(!bidderExist){
-			Bids bid = new Bids(bidder, bidValue);
-			bidList.add(bid);
-		}
-		return !bidderExist;//if the bidder does not exist, add successful, return true. else return false
+
+		Bids bid = new Bids(bidder, bidValue);
+		bidList.add(bid);
 	}
 
 	/**
@@ -63,16 +62,12 @@ public class Items {
 	 * @return
 	 */
 	public boolean editBid(String bidder, double newBid){
-		boolean bidderExist = true;
+		boolean bidderExist = false;
 		for(int i = 0; i <bidList.size(); i++){
 			if(bidList.get(i).getBidder() == bidder){
 				bidList.get(i).setBidValue(newBid);
+				bidderExist = true;
 			}			
-		}
-		if(!bidderExist){
-			System.out.println("You have not placed any bid on this item. \n"
-					+ "If you want to place a bid, please select place bid option.");
-			bidderExist = false;
 		}
 		return bidderExist;	//if the bidder exists, edit successful, return true. else return false
 	}
@@ -163,6 +158,22 @@ class Bids{
 	 */
 	public void setBidValue(double bidValue) {
 		this.bidValue = bidValue;
+	}
+
+}
+
+/**
+ * Place bid exception class.
+ * 
+ * @author Tan Pham
+ *
+ */
+class PlaceBidException extends Exception {
+
+	private static final long serialVersionUID = 1L;
+
+	public PlaceBidException(String arg0) {
+		super(arg0);
 	}
 
 }
