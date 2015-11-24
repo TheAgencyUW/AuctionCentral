@@ -39,7 +39,7 @@ public class Items {
 	 * @param bidder
 	 * @param bidValue
 	 */
-	public void addBid(String bidder, double bidValue) throws PlaceBidException{
+	public boolean addBid(String bidder, double bidValue) throws PlaceBidException{
 		if(bidValue<minBid){
 			throw new PlaceBidException("Your bid cannot be less than minimum bid.");
 		}
@@ -52,6 +52,8 @@ public class Items {
 
 		Bids bid = new Bids(bidder, bidValue);
 		bidList.add(bid);
+		
+		return true;
 	}
 
 	/**

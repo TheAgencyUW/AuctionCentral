@@ -18,7 +18,8 @@ import java.util.Scanner;
 public class BidderInterface 
 {
 	/** A printstream for a shortcut to print out to the console.*/
-	private static PrintStream myOut ;
+	private static PrintStream myOut;
+	
 	/** 
 	 * A scanner that is used to scan in different files and read from 
 	 * the console.
@@ -28,29 +29,44 @@ public class BidderInterface
 	//To store the calendar which contents all the auction passing from main.
 	private Calendar myCalendar;
 	
+	//
 	private ArrayList<Auction> myCurrentAuctions;
 	
+	// A list of all items that the bidder has bided on.
+	private ArrayList<BidedItem> myBidList = new ArrayList<BidedItem>();
 	
-	public void bidderInterface(){
+	private Bidder bid;// = new Bidder(myCalendar, null);
+	
+	private String bidderName;
+	
+	public void bidderInterface(String bidderName)
+	{
 		String input;
 		boolean back = false;
 		while(!back){
 			myOut.println("Welcome " + bidderName);
 			myOut.println("Please enter a command:\n0:log out\n1: view bided items and make change\n2: view current auctions.\n");
 			input = myIn.next();
-			if(input.equals("0")){	//break the while loop, end bidderInterface(), return control back to main class.
-				logout();
+			if(input.equals("0"))
+			{	//break the while loop, end bidderInterface(), return control back to main class.
+				logout(bidderName);
 				back = true;
-			}else if(input.equals("1")){
+			}
+			else if(input.equals("1"))
+			{
 				viewCurrentBids();
-			}else if(input.equals("2")){
+			}
+			else if(input.equals("2"))
+			{
 				//print the current auction and pass the control to that method.
 				auctionList();
-			}else{
+			}
+			else
+			{
 				myOut.println("Invalid input");
 			}
 		}
-
+	}
 		/**
 		 * I/O only
 		 *	No Junit needed 
@@ -58,10 +74,11 @@ public class BidderInterface
 		 * save the bidder info to a file for next time use
 		 * logout and return control the main class.
 		 */
-		private void logout(){
+		public void logout(String bidderName)
+		{
 			PrintWriter writer;
 			try {
-				writer = new PrintWriter(getBidderName() + ".txt");
+				writer = new PrintWriter(bidderName + ".txt");
 				for(int i = 0; i < myBidList.size(); i ++){
 					writer.print(myBidList.get(i).itemID + " ");
 					writer.print(myBidList.get(i).auctionName + " ");
@@ -69,7 +86,6 @@ public class BidderInterface
 				}		
 				writer.close();
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -83,7 +99,7 @@ public class BidderInterface
 		 *  List all the items that the bidder has bided on.
 		 * 
 		 */
-		private void viewCurrentBids ()
+		private void viewCurrentBids()
 		{	
 			String input;
 			int choice = 0;
@@ -124,9 +140,9 @@ public class BidderInterface
 						}
 					}
 					if(newBid == 0.0){
-						cancelBid(itemID, auction);
+						bid.cancelBid(itemID, auction);
 					}else{
-						changeBid(itemID, auction, newBid);
+						bid.changeBid(itemID, auction, newBid);
 					}
 					myOut.println("Your item has been changed successful as below.\n");
 				}else{
@@ -148,7 +164,7 @@ public class BidderInterface
 			int choice = 0;
 			while(!back){	//Auction list
 				myOut.println("Current auctions list\n\n");
-				myOut.println(myCalendar.viewCurrentAuctions());
+				//myOut.println(myCalendar.viewCurrentAuctions());
 
 				boolean validInput = false;
 				while(!validInput){
@@ -258,18 +274,25 @@ public class BidderInterface
 
 					//if place bid successful (bidder has never placed bid on this item before)
 					//add this item to the bidder's bided list.
-					if(myCurrentAuctions.get(aucID).getItem(item.getId()).addBid(bidderName, choice)){
-						enterBid(item.getId(), myCurrentAuctions.get(aucID).getName(),choice);
-					}else{
-						myOut.println("Please select a different item.\n");
-						break;
+					try {
+						if(myCurrentAuctions.get(aucID).getItem(item.getId()).addBid(bidderName, choice) == true)
+						{
+							bid.enterBid(item.getId(), myCurrentAuctions.get(aucID).getName(),choice);
+						}
+						else
+						{
+							myOut.println("Please select a different item.\n");
+							break;
+						}
+					} catch (PlaceBidException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-				}else{
+				}
+				else
+				{
 					myOut.println("Invalid input.");
 				}
 			}
 		}
-		
-		
 	}
-}

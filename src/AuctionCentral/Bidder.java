@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class Bidder
 {
 	
-	/** A printstream for a shortcut to print out to the console.*/
+	/** A PrintStream for a shortcut to print out to the console.*/
 	private static PrintStream myOut ;
 	/** 
 	 * A scanner that is used to scan in different files and read from 
@@ -93,7 +93,7 @@ public class Bidder
 	 * @param auc
 	 * @param newBid
 	 */
-	public void changeBid(int itemID, String auction, double newBid)
+	protected void changeBid(int itemID, String auction, double newBid)
 	{	
 		for(int j = 0; j < myBidList.size(); j++){
 			if(myBidList.get(j).auctionName == auction && myBidList.get(j).itemID == itemID){
@@ -111,66 +111,11 @@ public class Bidder
 	 * @param item
 	 * @param auction
 	 */
-	public void cancelBid(int itemID, String auc)
+	protected void cancelBid(int itemID, String auc)
 	{
 		for(int i = 0; i < myBidList.size(); i++){
 			if(myBidList.get(i).auctionName == auc && myBidList.get(i).itemID == itemID){
 				myBidList.remove(i);
-			}
-		}
-	}
-
-	
-
-
-	/**
-	 * I/O only
-	 * NO need Junit for this method.
-	 * enterBid() is tested separately.
-	 * 
-	 * Print to console the details of the item of the auction aucID
-	 * Ask the bidder to place a bid on this item, or enter 0 to go back to items list.
-	 * If the bidder has already placed bid on this item and try to bid again, print out an error message,
-	 * then automatic return to the items list.
-	 * @param item
-	 * @param aucID
-	 */
-	public void viewItem(Items item, int aucID)
-	{
-		boolean back = false;
-		String input;
-		int choice = 0;
-		while(!back){
-			myOut.println("Item's details: \n");
-			myOut.println(item.toString() + "\n");
-
-			boolean validInput = false;
-			while(!validInput){
-				myOut.println("Please enter 1 to place bid on this item or 0 to go back to item list. \n");
-				input = myIn.next();
-				try{
-					choice = Integer.parseInt(input);
-					validInput = true;
-				}catch(Exception e){
-					myOut.println("Invalid input");
-				}
-			}
-			if(choice == 0){
-				back = true;
-			}else if(choice == 1){
-				myOut.println("Please enter your bid value.\n");
-				choice = myIn.nextInt();
-
-				//if place bid successful (bidder has never placed bid on this item before)
-				//add this item to the bidder's bided list.
-				if(myCurrentAuctions.get(aucID).getItem(item.getId()).addBid(bidderName, choice)){
-					enterBid(item.getId(), myCurrentAuctions.get(aucID).getName(),choice);
-				}else{
-					myOut.println("Please select a different item.\n");
-					break;
-				}
-			}else{
-				myOut.println("Invalid input.");
 			}
 		}
 	}
@@ -180,7 +125,7 @@ public class Bidder
 	 * 
 	 * add an item to the bidder's bid list
 	 */
-	private void enterBid(int item, String auc, double bid)
+	protected void enterBid(int item, String auc, double bid)
 	{
 		BidedItem bidedItem = new BidedItem(item, auc, bid);
 		myBidList.add(bidedItem);
