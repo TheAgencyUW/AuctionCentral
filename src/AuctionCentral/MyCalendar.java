@@ -2,6 +2,8 @@ package AuctionCentral;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -187,12 +189,24 @@ public class MyCalendar {
 	public boolean hasMinTimeBetweenAuctions(Date theDate, int theStartTime,
 			int theEndTime) {
 		YearMonth ym = parseYearMonth(theDate);
-		int day = getDayFromDate(theDate);
 		boolean passed = true;
+		int start, end;
 		
 		if (myAuctionListByYearMonth.containsKey(ym)) {
 			ArrayList<Auction> checkList = myAuctionListByYearMonth.get(ym);
 			for (int i = 0; i < checkList.size() && passed; i++) {
+				if (getDaysBetween(checkList.get(i).getMyDate(), theDate) == 0) {
+					start = getTimeInto24Hour(checkList.get(i).getMyStartTime());
+					end = getTimeInto24Hour(checkList.get(i).getMyEndTime());
+					if (start > theEndTime) {
+						passed = theEndTime - start >= MINHOURSBETWEENTWOAUCTIONS;
+					} else if (theStartTime > end) {
+						passed = end - theStartTime >= MINHOURSBETWEENTWOAUCTIONS;
+					} else {
+						passed = false;
+					}
+					
+				}
 			}
 		}
 		
@@ -302,10 +316,86 @@ public class MyCalendar {
 	 * 
 	 * @param theYearMonth is the year and month that you want to view.
 	 * @return a string representation of the month calendar.
+	 * @throws ParseException 
 	 */
-	public String getAnyMonthCalendarView(YearMonth theYearMonth) {
+	public String getAnyMonthCalendarView(YearMonth theYearMonth) throws ParseException {
 		StringBuilder sb = new StringBuilder();
-		//needs to be done.
+		
+		//-------------------------------------------------------------------------------------
+		//| Monday    | Tuesday   | Wednesday | Thursday  | Friday    | Saturday  | Sunday    |
+		//-------------------------------------------------------------------------------------
+		//|           |         1 |         2 |         3 |         4 |         5 |         6 |   
+		//|           |           |1) Goodwill|           |           |           |           |   
+		//|           |           |           |           |           |           |           |   
+		//-------------------------------------------------------------------------------------
+		String lineBreak = "----------------------------------------------------"
+				+ "---------------------------------";
+		String newLine = "\n";
+		String space = " ";
+		String lineSep = "|";
+		int currDay = 0, length = 0, auctionCount = 1;
+		ArrayList<Auction> currAuctionList = myAuctionListByYearMonth.get(theYearMonth);
+		Date checkDate = new Date();
+		// Calendar set-up
+		length = theYearMonth.lengthOfMonth();
+		currDay -= theYearMonth.atDay(1).getDayOfWeek().getValue();
+		currDay++;
+		sb.append(lineBreak);
+		sb.append(newLine);
+		sb.append(lineSep);
+		
+		for (int i = 0; i < 7; i++){
+			sb.append(space);
+			sb.append(String.format("%9s", myDays[i]));
+			sb.append(space);
+			sb.append(lineSep);
+		}
+		sb.append(newLine);
+		
+		for (int i = 0; i < 21; i++){
+			if (i % 4 == 0) {
+				sb.append(lineBreak);
+				sb.append(newLine);
+				if (currDay >= length) {
+					i += 4;
+				}
+			} else {
+				for (int j = 0; j < lineBreak.length(); j++) {
+					if (j % 12 == 0) {
+//						out.print("=");
+						sb.append(lineSep);
+						if (i % 4 == 1 && j < lineBreak.length() - 1) {
+							currDay++;
+						}
+					} else if (i % 4 == 1){
+//						out.print(" ");
+						sb.append(space);
+						if (currDay > 0 && currDay <= length) {
+							if (j % 12 == 9) {
+								sb.append(String.format("%2d", currDay));
+								j += 2;
+								checkDate = new SimpleDateFormat("dd/mm/yyyy").parse(currDay +
+										"/" + theYearMonth.getMonthValue() + "/" +
+										theYearMonth.getYear());
+							}
+						}
+					} else if (j % 12 == 1) {
+						if (getDaysBetween(checkDate, currAuctionList.get
+								(auctionCount - 1).getMyDate()) == 0) {
+							sb.append(String.format("%2d. %8s", auctionCount, 
+									currAuctionList.get(auctionCount - 1).getMyOrg().substring(0, 8)));
+							auctionCount++;
+						} else {
+							sb.append(space);
+						}
+					} else {
+						sb.append(space);
+					}
+				}
+//				out.println();	
+			}
+		}
+		
 		return sb.toString();
 	}
 	
@@ -314,23 +404,74 @@ public class MyCalendar {
 	 * auctions put in.
 	 * 
 	 * @return a string representation of the month calendar.
+	 * @throws ParseException 
 	 */
-	public String getCurrentMonthCalendarView() {
+	public String getCurrentMonthCalendarView() throws ParseException {
 		return getAnyMonthCalendarView(YearMonth.now());
 	}
 	
 	/**
 	 * Prints any months calendar to the console.
+	 * @throws ParseException 
 	 */
-	public void printAnyMonthCalendar(YearMonth theYearMonth) {
+	public void printAnyMonthCalendar(YearMonth theYearMonth) throws ParseException {
 		System.out.println(getAnyMonthCalendarView(theYearMonth));
 	}
 	
 	/**
 	 * Prints the current month calendar to the console.
+	 * @throws ParseException 
 	 */
-	public void printCurrentMonthCalendar() {
+	public void printCurrentMonthCalendar() throws ParseException {
 		System.out.println(getCurrentMonthCalendarView());
+	}
+	
+	/**
+	 * Copies the contents of fromList and adds them to toList.
+	 * 
+	 * @param toList
+	 * @param fromList
+	 */
+	private void copyList(ArrayList<Auction> toList, ArrayList<Auction> fromList) {
+		for (int i = 0; i < fromList.size(); i++) {
+			toList.add(fromList.get(i));
+		}
+	}
+	
+	/**
+	 * Bubble sorts the list coming in and returns a list that is sorted by date.
+	 * 
+	 * @param toSort
+	 * @return
+	 */
+	private ArrayList<Auction> sortList(ArrayList<Auction> toSort) {
+		ArrayList<Auction> sortedList = new ArrayList<Auction>();
+		boolean sorted = false;
+		
+		sortedList.clear();
+		if (toSort.size() > 1) {
+			for (int i = 0; i < toSort.size() && !sorted; i++) {
+				sorted = true;
+				for (int j = 0; j < toSort.size() - 1; j++) {
+					if (getDaysBetween(toSort.get(j).getMyDate(), 
+							toSort.get(j + 1).getMyDate()) <= 0) {
+						sortedList.add(toSort.get(j));
+					} else {
+						sorted = false;
+						sortedList.add(toSort.get(j + 1));
+						sortedList.add(toSort.get(j));
+						j++;
+					}
+				}
+				toSort.clear();
+				copyList(toSort, sortedList);
+				sortedList.clear();
+			}
+		} 
+		
+		copyList(sortedList, toSort);
+		
+		return sortedList;
 	}
 	
 	/**
@@ -345,8 +486,8 @@ public class MyCalendar {
 		}
 		ArrayList<Auction> newList = myAuctionListByYearMonth.get(ym);
 		newList.add(theCurentAuction);
-		//sort list
-		myAuctionListByYearMonth.put(ym, newList);
+		//sorts list before adding it back in
+		myAuctionListByYearMonth.put(ym, sortList(newList));
 	}
 
 	/**
@@ -361,8 +502,8 @@ public class MyCalendar {
 		
 		ArrayList<Auction> newList = myAuctionsByOrg.get(theCurentAuction.getMyOrg());
 		newList.add(theCurentAuction);
-		//sort list
-		myAuctionsByOrg.put(theCurentAuction.getMyOrg(), newList);
+		//sorts list before putting it back in.
+		myAuctionsByOrg.put(theCurentAuction.getMyOrg(), sortList(newList));
 	}
 
 	/**
@@ -374,7 +515,9 @@ public class MyCalendar {
 	private void addAuctionToCurrentAuctions(Auction theCurentAuction) {
 		if (theCurentAuction.getMyDate().getTime() > CURRENTDATE.getTime()) {
 			myCurrentAuctions.add(theCurentAuction);
-			// need to sort list.
+			ArrayList<Auction> newList = sortList((ArrayList<Auction>) myCurrentAuctions);
+			myCurrentAuctions.clear();
+			copyList((ArrayList<Auction>) myCurrentAuctions, newList);
 		}
 	}
 	
