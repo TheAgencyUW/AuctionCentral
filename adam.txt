@@ -1,0 +1,2 @@
+1 auction1 1000.0
+2 auction2 2000.0

@@ -1,368 +1,401 @@
-/**
- * 
- */
-package users;
+package AuctionCentral;
 
-import java.util.Calendar;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Scanner;
 
 /**
- * @author Indiana
+ * @author Indiana, Tan Pham
+ * Last edit by Tan Pham
  * Sets up the Non-Profit view of the Auction Central Project.
  */
 public class NonProfitOrganizationStaff {
-
-	
 	/**
-	 * Holds the calendar.
+	 * Gets input from the user.
 	 */
-	private users.Calendar myCalendar;
-	
+	private static Scanner myIn;
+
+
 	/**
-	 * Holds the NPO name.
+	 * a buffer to read in a complete line of input.
+	 */
+	private static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+	/** A print stream for a shortcut to print out to the console.*/
+	private static PrintStream myOut ;
+
+	/**
+	 * Holds the calendar for use by ACE.
+	 */
+	private MyCalendar myCalendar;
+
+	/**
+	 * Holds the name for the employee.
+	 */
+	private String staffName;
+
+	/**
+	 * the name of the organization which the staff is representing for.
 	 */
 	private String myOrganizationName;
 
 	/**
-	 * Gets input from the user.
+	 * Holds the current auction for this non-profit.
 	 */
-	private Scanner myIn;
+	private Auction currentAuction;
 
 	/**
-	 * Holds the representative name.
+	 * Constructor.
 	 */
-	private String myRepresentativeName;
-		
-	/**
-	 * Holds the auction date.
-	 */
-	String myDate;
-	
-	/**
-	 * Holds the item.
-	 */
-	Items myItem;
-	
-	/**
-	 * Holds the month.
-	 */
-	String myMonth;
-	
-	/**
-	 * Holds the day.
-	 */
-	int myDay;
-	
-	/**
-	 * Holds the year.
-	 */
-	int myYear;
-	
-	/**
-	 * Holds the start time.
-	 */
-	String myStart;
-	
-	/**
-	 * Holds the end time.
-	 */
-	String myEnd;
-	
-	/**
-	 * Holds the auction title.
-	 */
-	String title;
-	
-	/**
-	 * Auction editing permission.
-	 */
-	Boolean myEditAuction;
-	
-	/**
-	 * Auction creation permission.
-	 */
-	Boolean myAddAuction;
-	
-	/**
-	 * Add item permission.
-	 */
-	Boolean myAddItem;
-	
-	/**
-	 * Edit item permission.
-	 */
-	Boolean myEditItem;
-	
-	/**
-	 * A counter for the item id.
-	 */
-	int myCounter;
-	
-	/**
-	 * Holds the auction.
-	 */
-	Auction myAuction;
-	
-	/**
-	 * 
-	 * @param calendar
-	 * @param org
-	 * @param rep
-	 */
-	public NonProfitOrganizationStaff(users.Calendar calendar, String org, String rep) {
+	public NonProfitOrganizationStaff(MyCalendar calendar, String name) {
 		myCalendar = calendar;
-		myOrganizationName = org;
-		myRepresentativeName = rep;
-		myEditAuction = false;
-		myAddAuction = true;
-		myAddItem = false;
-		myEditItem = false;
-		myCounter = 0;
+		staffName = name;
+		loadStaff();
+		myOut = new PrintStream(System.out, true);
+		myIn = new Scanner(System.in);
+		staffInterface();
 	}
-	
-	/**
-	 * The interface for the ACE.
-	 */
-	public void organizationInterface(){
-		int input;
-		while(true){
-			System.out.println("Welcome " + myRepresentativeName);
-			System.out.println("Please enter a command:\n0:log out\n1: add new auction\n2: edit auction.\n3: add new item\n4: edit item\n");
-			input = myIn.nextInt();
-			if(input == 0){	//break the while loop, end bidderInterface(), return control back to main class.
-				break;
-			}else if(input == 1 && myAddAuction){
-				addNewAuction();
-			}else if(input == 2 && myEditAuction){
-				editAuction();
-			}else if(input == 3 && myAddItem) {
-				addNewItem();
-			}else if(input == 4 && myEditItem) {
-				System.out.println("Please enter the item id number(id number is the items entry number): ");
-				int id = myIn.nextInt();
-				editItem();
-			}else{
-				System.out.println("Invalid input");
+
+	private void loadStaff(){
+		String date = "";
+		try {
+			myIn = new Scanner(new File(staffName + ".txt"));			
+			myOrganizationName = myIn.next();
+			if(myIn.hasNext()) date = myIn.next();
+			myIn.close();
+		} catch (FileNotFoundException e) {
+			myOut.println("staff not found, login as new staff");
+		}
+		for(int i = 0; i < myCalendar.getCurrentAuctions().size(); i++){
+			if(myCalendar.getCurrentAuctions().get(i).getName().equals(myOrganizationName + " - " + date)){
+				currentAuction = myCalendar.getCurrentAuctions().get(i);
 			}
 		}
 
 	}
-	
+
+	public void staffInterface(){
+		String input;
+		boolean back = false;
+		while(!back){
+			myOut.println("Welcome " + staffName);
+			myOut.println("Please enter a command:\n0:log out\n1: schedule new auction.\n"
+					+ "2: view the current auction.\n");
+			input = myIn.next();
+			if(input.equals("0")){	//break the while loop, end NPO_Interface(), return control back to main class.
+				back = true;
+			}else if(input.equals("1")){
+				addNewAuction();
+			}else if(input.equals("2")){
+				viewCurrentAuction();
+			}else{
+				myOut.println("Invalid input");
+			}
+		}
+
+	}
+
+
 	/**
 	 * Adds a new auction to the calendar for this non profit organization.
 	 */
-	void addNewAuction() {
-		System.out.println("Enter the auction month as a number: ");
-		int month = myIn.nextInt();
-		while(month < 1 || month > 12) {
-			System.out.println("Error. Could not set date. Enter the auction month: ");
-			month = myIn.nextInt();
+	private void addNewAuction() {
+		Date date;
+		int startTime = 0;
+		int endTime = 0;
+
+		myOut.println("Please enter the date for the new auction.");
+		date = getDate();
+
+		myOut.println("Please enter the start time (must be a number between 0 and 23, inclusive)");
+		startTime = getTime();
+
+		myOut.println("Please enter the end time (must be a number between 0 and 23, inclusive)");
+		endTime = getTime();
+
+		Auction auc = new Auction(myOrganizationName, date, startTime, endTime);
+
+		try {
+			myCalendar.addAuction(auc);
+			currentAuction = auc;
+			myOut.println("You have successfully added a new acution.\n");
+			viewCurrentAuction();
+		} catch (HasMaxAuctionsExceptions | MinDaysNotPassedException
+				| MaxPer7DaysException | MaxPerDayException
+				| MoreTimeBetweenAuctionsException | MaxDaysPassedException e) {
+			// TODO Auto-generated catch block
+			myOut.print(e.getMessage());
 		}
-		if(month == 1) {
-			myMonth = "January";
-		} else if(month == 2) {
-			myMonth = "February";
-		} else if(month == 3) {
-			myMonth = "March";
-		} else if(month == 4) {
-			myMonth = "April";
-		} else if(month == 5) {
-			myMonth = "May";
-		} else if(month == 6) {
-			myMonth = "June";
-		} else if(month == 7) {
-			myMonth = "July";
-		} else if(month == 8) {
-			myMonth = "August";
-		} else if(month == 9) {
-			myMonth = "September";
-		} else if(month == 10) {
-			myMonth = "October";
-		} else if(month == 11) {
-			myMonth = "November";
-		} else {
-			myMonth = "December";
-		}
-		System.out.println("Enter the auction day: ");
-		int day = myIn.nextInt();
-		while(day < 1 || day > 30) {
-			System.out.println("Error. Could not set date. Enter the auction day: ");
-			day = myIn.nextInt();
-		}
-		myDay = day;
-		System.out.println("Enter the auction year: ");
-		int year = myIn.nextInt();
-		while(year < Calendar.YEAR && myYear == year) {
-			System.out.println("Error. Could not set date. Enter the auction year: ");
-			year = myIn.nextInt();
-		}
-		myYear = year;
-		myDate = (myMonth + myDay + myYear);
-		System.out.println("Enter the auction start hour: ");
-		int start = myIn.nextInt();
-		while(start < 0 || start > 24) {
-			System.out.println("Error. Could not set date. Enter the auction hour: ");
-			start = myIn.nextInt();
-		}
-		if(start < 12) {
-			myStart = (start + ":00am");
-		} else {
-			myStart = (start - 12 + ":00pm");
-		}
-		System.out.println("Enter the auction end hour(0 hour is 12am): ");
-		int end = myIn.nextInt();
-		while(end < 0 || end > 23) {
-			System.out.println("Error. Could not set date. Enter the auction hour: ");
-			end = myIn.nextInt();
-		}
-		if(end < 12) {
-			myEnd = (end + ":00am");
-		} else {
-			myEnd = (end - 12 + ":00pm");
-		}
-		myAuction = new Auction(myOrganizationName, myDate, myStart, myEnd);
-		myEditAuction = true;
-		myAddItem = true;
+
 	}
-	
+
 	/**
-	 * Edits a currently existing auction.
+	 * create a Date object by asking user to enter the year, month and day.
+	 * @return
 	 */
-	void editAuction() {
-		System.out.println("Please enter the key of what you want to edit "
-				+ "(m for month, d for day, y for year, s for start time, n for end time, and e to exit): ");
-		Scanner theScn = null;
-		String change = theScn.next();
-		while(change != "e") {
-			if(change == "m") {
-				System.out.println("Enter the auction month: ");
-				int month = theScn.nextInt();
-				while(month < 1 || month > 12) {
-					System.out.println("Error. Could not set date. Enter the auction month: ");
-					month = theScn.nextInt();
+	private Date getDate(){		
+		boolean validInput = false;
+		int year = 0, month = 0, day = 0;
+		Date date;
+
+		myOut.println("Enter year: ");
+		year = getInt();
+
+		myOut.println("Enter month as a number from 1 to 12: ");			
+		while(!validInput){
+			month = getInt() - 1 ;
+			validInput = true;
+			if(month < 0 || month > 11){
+				myOut.println("Invalid month.");
+				validInput = false;
+			}
+		}
+
+		validInput = false;
+		myOut.println("Enter day as an integer from 1 to 31: ");
+		while(!validInput){
+			day = getInt();
+			validInput = true;
+			if(day < 1 || day > 31){
+				myOut.println("Invalid day.");
+				validInput = false;
+			}
+		}
+
+		date = new GregorianCalendar(year, month, day).getTime();
+		return date;
+	}
+
+	/**
+	 * 
+	 * @return an integer between 0 and 23.
+	 */
+	private int getTime(){
+		int time = 0;
+		boolean validTime = false;
+		while(!validTime){
+			time = getInt();
+			validTime = true;
+			if(time < 0 || time > 23){
+				myOut.println("Invalid time.");
+				validTime = false;
+			}
+		}
+		return time;
+	}
+
+	/**
+	 * list the current auction details.
+	 */
+	private void viewCurrentAuction(){
+		if(currentAuction == null){
+			myOut.println("You currently have no scheduled auction.\n");
+		}else{
+			myOut.println("Current auction details:");
+			myOut.println("Auction name: " + currentAuction.getName());
+			myOut.println("Auction date: " + currentAuction.getMyDate());
+			myOut.println("Auction start time: " + currentAuction.getMyStartTime());
+			myOut.println("Auction end time: " + currentAuction.getMyEndTime());
+
+			String input;
+			boolean back = false;
+			while(!back){
+				myOut.println("Please enter a command:\n0: go back.\n1: edit auction infomation.\n"
+						+ "2: add new item.\n3: view current items");
+				input = myIn.next();
+				if(input.equals("0")){	
+					back = true;
+				}else if(input.equals("1")){
+					editAuction();
+				}else if(input.equals("2")){
+					addNewItem();
+				}else if(input.equals("3")){
+					viewItems();
+				}else{
+					myOut.println("Invalid input");
 				}
-				if(month == 1) {
-					myMonth = "January";
-				} else if(month == 2) {
-					myMonth = "February";
-				} else if(month == 3) {
-					myMonth = "March";
-				} else if(month == 4) {
-					myMonth = "April";
-				} else if(month == 5) {
-					myMonth = "May";
-				} else if(month == 6) {
-					myMonth = "June";
-				} else if(month == 7) {
-					myMonth = "July";
-				} else if(month == 8) {
-					myMonth = "August";
-				} else if(month == 9) {
-					myMonth = "September";
-				} else if(month == 10) {
-					myMonth = "October";
-				} else if(month == 11) {
-					myMonth = "November";
-				} else {
-					myMonth = "December";
-				}
-				myDate = (myMonth + myDay + myYear);
-				myAuction.setMyDate(myDate);
-			} else if(change == "d") {
-				System.out.println("Enter the auction day: ");
-				int day = theScn.nextInt();
-				while(day < 1 || day > 30) {
-					System.out.println("Error. Could not set date. Enter the auction day: ");
-					day = theScn.nextInt();
-				}
-				myDay = day;
-				myDate = (myMonth + myDay + myYear);
-				myAuction.setMyDate(myDate);
-			} else if(change == "y") {
-				System.out.println("Enter the auction year: ");
-				int year = theScn.nextInt();
-				while(year < Calendar.YEAR) {
-					System.out.println("Error. Could not set date. Enter the auction year: ");
-					year = theScn.nextInt();
-				}
-				myYear = year;
-				myDate = (myMonth + myDay + myYear);
-				myAuction.setMyDate(myDate);
-			} else if(change == "s") {
-				System.out.println("Enter the auction start hour: ");
-				int start = myIn.nextInt();
-				while(start < 0 || start > 24) {
-					System.out.println("Error. Could not set date. Enter the auction hour: ");
-					start = myIn.nextInt();
-				}
-				if(start < 12) {
-					myStart = (start + ":00am");
-				} else {
-					myStart = (start - 12 + ":00pm");
-				}
-			} else if(change == "n") {
-				System.out.println("Enter the auction end hour(0 hour is 12am): ");
-				int end = myIn.nextInt();
-				while(end < 0 || end > 23) {
-					System.out.println("Error. Could not set date. Enter the auction hour: ");
-					end = myIn.nextInt();
-				}
-				if(end < 12) {
-					myEnd = (end + ":00am");
-				} else {
-					myEnd = (end - 12 + ":00pm");
-				}
-			} else {
-				System.out.println("Please enter the key of what you want to edit "
-						+ "(m for month, d for day, y for year, s for start time, n for end time, and e to exit): ");
-				change = theScn.next();
 			}
 		}
 	}
-	
+
+	/**
+	 * Edits a currently existing auction.
+	 */
+	private void editAuction() {
+		String input;
+		boolean back = false;
+		while(!back){
+			myOut.println("Please enter a command:\n0: go back.\n1: edit auction date.\n"
+					+ "2: edit auction start time.\n3: edit auction endtime");
+			input = myIn.next();
+			if(input.equals("0")){	
+				back = true;
+			}else if(input.equals("1")){
+				myOut.println("Please enter new date.");			
+				Date newDate = getDate();
+				currentAuction.setMyDate(newDate);
+				myOut.println("edit date successful.");
+				break;
+			}else if(input.equals("2")){
+				myOut.println("Please enter the start time (must be a number between 0 and 23, inclusive");
+				int newTime = getTime();
+				currentAuction.setMyStartTime(newTime);
+				myOut.println("edit start time successful.");
+				break;
+			}else if(input.equals("3")){
+				myOut.println("Please enter the start time (must be a number between 0 and 23, inclusive");
+				int newTime = getTime();
+				currentAuction.setMyEndTime(newTime);
+				myOut.println("edit end time successful.");
+				break;
+			}else{
+				myOut.println("Invalid input");
+			}
+		}
+	}
+
 	/**
 	 * Adds an item to the current available auction for this non profit organization.
 	 */
-	void addNewItem() {
-		myCounter++;
-		System.out.println("Please enter the item name: ");
-		String name = myIn.nextLine();
-		System.out.println("Please enter the item description: ");
-		String description = myIn.nextLine();
-		System.out.print("Please enter the minimum bid for this item: ");
-		int minimumBid = myIn.nextInt();
-		myAuction.addItem(name, description, minimumBid);
-		myEditItem = true;
+	private void addNewItem() {
+		String itemName = null;
+		String description = "";
+		double min = 0;
+
+		myOut.println("Please enter item name");
+		itemName = getLine();
+
+
+		myOut.println("Please enter item description.");		
+		description = getLine();
+
+		myOut.println("Please enter item min bid");
+		min = getDouble();
+
+		currentAuction.addItem(itemName, description, min);
+		myOut.println("add item successful");
 	}
-	
+
+	/**
+	 * get a complete line of input from console
+	 * @return a string
+	 */
+	private String getLine(){
+		String toReturn = "";
+		try {
+			toReturn = br.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return toReturn;
+	}
+
+	/**
+	 * get a double number from console input.
+	 * @return a double
+	 */
+	private double getDouble(){
+		double toreturn = 0;
+		String input;
+		boolean validInput = false;
+		while(!validInput){
+			input = myIn.next();
+			try{
+				toreturn = Double.parseDouble(input);
+				validInput = true;
+			}catch(Exception e){
+				myOut.print("Invalid input. Please try again");
+			}		
+		}
+		return toreturn;
+	}
+
+	/**
+	 * get an integer from console input
+	 * @return an integer.
+	 */
+	private int getInt(){
+		int toreturn = 0;
+		String input;
+		boolean validInput = false;
+		while(!validInput){
+			input = myIn.next();
+			try{
+				toreturn = Integer.parseInt(input);
+				validInput = true;
+			}catch(Exception e){
+				myOut.print("Invalid input. Please try again");
+			}		
+		}
+		return toreturn;
+	}
+
+
+	/**
+	 * List the items of the current auction.
+	 */
+	private void viewItems(){
+		boolean back = false;
+		int choice = 0;
+		while(!back){	//items list of the selected auction.
+			myOut.println("List of items:\n");
+			myOut.println(currentAuction.retrieveItemList());
+
+			myOut.println("\nPlease enter an item ID number or 0 to go back.\n");
+			choice = getInt();
+
+			if(choice == 0){	//break while loop go back.
+				back = true;
+			}else {
+				Items selectedItem = currentAuction.getItem(choice);
+				if(selectedItem == null){
+					myOut.print("Cannot find your selection, please try again.\n");
+				}else{
+					//sub menu, view item details and place bid.
+					editItem(choice);						
+				}
+			}
+		}
+	}
+
 	/**
 	 * Edits a currently existing item.
 	 */
-	void editItem() {
-		System.out.println("Please enter the id of the item you wish to edit: ");
-		int id = myIn.nextInt();
-		myItem = myAuction.getItem(id);
-		System.out.println("Please enter the key of what you want to edit "
-				+ "(n for name, d for description, b for minimum bid, and e to exit): ");
-		String change = myIn.next();
-		while(change != "e") {
-			if(change == "n"){
-				System.out.println("Please enter the item name: ");
-				myAuction.editItemName(id, myIn.nextLine());
-			} else if(change == "d") {
-				System.out.println("Please enter the item description: ");
-				myAuction.editItemDes(id, myIn.nextLine());
-			} else if(change == "b") {
-				System.out.print("Please enter the minimum bid for this item: ");
-				myAuction.editItemMinBid(id, myIn.nextInt());
-			} else {
-				System.out.println("Please enter the id of the item you wish to edit: ");
-				id = myIn.nextInt();
-				myItem = myAuction.getItem(id);
-				System.out.println("Please enter the key of what you want to edit "
-						+ "(i for id, n for name, d for description, b for minimum bid, and e to exit): ");
-				change = myIn.next();
+	private void editItem(int itemID) {
+		String input;
+		boolean back = false;
+		while(!back){
+			myOut.println("Please enter a command:\n0: go back.\n1: edit item name.\n"
+					+ "2: edit item description.\n3: edit item min bid");
+			input = myIn.next();
+			if(input.equals("0")){	
+				back = true;
+			}else if(input.equals("1")){
+				myOut.println("Please enter new item name.");
+				String newName = getLine();
+				currentAuction.getItem(itemID).setMyName(newName);
+				myOut.println("edit item name successfull");
+				break;
+			}else if(input.equals("2")){
+				myOut.println("Please enter new item description.");
+				String newdes = getLine();
+				currentAuction.getItem(itemID).setMyDescription(newdes);
+				myOut.println("edit description successful");
+				break;
+			}else if(input.equals("3")){
+				myOut.println("Please enter new min bid value.");
+				double newbid = getDouble();
+				currentAuction.getItem(itemID).setMinBid(newbid);
+				myOut.println("edit min bid success");
+				break;
+			}else{
+				myOut.println("Invalid input");
 			}
 		}
 	}

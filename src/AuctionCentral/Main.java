@@ -6,6 +6,7 @@ package AuctionCentral;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -21,9 +22,9 @@ public class Main {
 	private static String myCurrentUserRole;
 	/** A map to store the username as a key and their role as a value.*/
 	private static Map<String, String> myUserList;
-	/** A calendar to hold all the different auctions and used to display them.*/
-	private static Calendar myCalendar;
-	/** A printstream for a shortcut to print out to the console.*/
+	/** A calendar to hold all the different auction and used to display them.*/
+	private static MyCalendar myCalendar;
+	/** A print stream for a shortcut to print out to the console.*/
 	private static PrintStream myOut;
 	/** 
 	 * A scanner that is used to scan in different files and read from 
@@ -50,7 +51,7 @@ public class Main {
 	 * A method to run the program AuctionCentral.
 	 */
 	private static void RunProgram() {
-		myCalendar = new Calendar();
+		myCalendar = new MyCalendar();
 		loadCalendar();
 		myIn = new Scanner(System.in);
 		while(true){	
@@ -101,8 +102,7 @@ public class Main {
 	public static void createUser(){
 		myChecked = false;
 		switch(myCurrentUserRole){
-		case "bidder" : Bidder bidder = new Bidder(myCalendar, myCurrentUser);
-						bidder.bidderInterface();
+		case "bidder" : BidderInterface bidder = new BidderInterface(myCalendar, myCurrentUser);
 						break;
 		case "npo" 	  : NonProfitOrganizationStaff npo = new NonProfitOrganizationStaff(myCalendar, myCurrentUser);
 						npo.staffInterface();
@@ -124,7 +124,7 @@ public class Main {
 			while (myIn.hasNext()) {
 				user = myIn.next();
 				type = myIn.next();
-				type = type.substring(0, type.lastIndexOf(";"));
+				user = user.substring(0, user.lastIndexOf(";"));
 				myUserList.put(user, type);
 			}
 			myIn.close();
@@ -135,8 +135,26 @@ public class Main {
 	}
 	
 	private static void loadCalendar(){
-		myCalendar.addAuction(new Auction("auction1", "10/10/2010", "8am", "1pm"));
-		myCalendar.addAuction(new Auction("auction2", "11/11/2011", "8am", "1pm"));
+		try {
+			myCalendar.addAuction(new Auction("auction1", new GregorianCalendar(2016, java.util.Calendar.JANUARY, 1).getTime(), 8, 13));
+		} catch (HasMaxAuctionsExceptions | MinDaysNotPassedException
+				| MaxPer7DaysException | MaxPerDayException
+				| MoreTimeBetweenAuctionsException | MaxDaysPassedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		myCalendar.getCurrentAuctions().get(0).addItem("item1", "item 1 from auction 1", 5.0);
+		myCalendar.getCurrentAuctions().get(0).addItem("item2", "item 2 from auction 1", 10.0);
+		try {
+			myCalendar.addAuction(new Auction("auction2", new GregorianCalendar(2015, java.util.Calendar.DECEMBER, 25).getTime(), 9, 14));
+		} catch (HasMaxAuctionsExceptions | MinDaysNotPassedException
+				| MaxPer7DaysException | MaxPerDayException
+				| MoreTimeBetweenAuctionsException | MaxDaysPassedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		myCalendar.getCurrentAuctions().get(1).addItem("item1", "item 1 from auction 2", 15.0);
+		myCalendar.getCurrentAuctions().get(1).addItem("item2", "item 2 from auction 2", 20.0);
 	}
 
 }

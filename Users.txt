@@ -1,3 +1,4 @@
-TomNimble; NPO
-MeganShift; ACE
-JohnSmith; Bidder
+adam; bidder
+tom; bidder
+marry; ace
+jack; npo

@@ -9,8 +9,8 @@ import java.util.Date;
 public class Auction {
 	private String myName;
 	private String myOrg;
-	private String myStartTime;
-	private String myEndTime;
+	private int myStartTime;
+	private int myEndTime;
 	private Date myDate;
 	private ArrayList<Items> myItems = new ArrayList<Items>();
 	private int ItemID;
@@ -22,7 +22,7 @@ public class Auction {
 	 * @param startTime
 	 * @param endTime
 	 */
-	public Auction(String org, Date date, String startTime, String endTime){
+	public Auction(String org, Date date, int startTime, int endTime){
 		myOrg = org;
 		myStartTime = startTime;
 		myEndTime = endTime;
@@ -124,25 +124,25 @@ public class Auction {
 	/**
 	 * @return the myStartTime
 	 */
-	public String getMyStartTime() {
+	public int getMyStartTime() {
 		return myStartTime;
 	}
 	/**
 	 * @param myStartTime the myStartTime to set
 	 */
-	public void setMyStartTime(String myStartTime) {
+	public void setMyStartTime(int myStartTime) {
 		this.myStartTime = myStartTime;
 	}
 	/**
 	 * @return the myEndTime
 	 */
-	public String getMyEndTime() {
+	public int getMyEndTime() {
 		return myEndTime;
 	}
 	/**
 	 * @param myEndTime the myEndTime to set
 	 */
-	public void setMyEndTime(String myEndTime) {
+	public void setMyEndTime(int myEndTime) {
 		this.myEndTime = myEndTime;
 	}
 	/**

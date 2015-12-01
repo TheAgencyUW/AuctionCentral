@@ -3,6 +3,7 @@
 package AuctionCentral;
 
 import java.io.PrintStream;
+import java.text.ParseException;
 import java.time.YearMonth;
 import java.util.Scanner;
 
@@ -16,7 +17,7 @@ public class AuctionCentralEmployee {
 	/**
 	 * Holds the calendar for use by ACE.
 	 */
-	private Calendar myCalendar;
+	private MyCalendar myCalendar;
 
 	/**
 	 * Holds the name for the employee.
@@ -34,7 +35,7 @@ public class AuctionCentralEmployee {
 	/**
 	 * Constructor.
 	 */
-	public AuctionCentralEmployee(Calendar calendar, String name) {
+	public AuctionCentralEmployee(MyCalendar calendar, String name) {
 		myCalendar = calendar;
 		employeeName = name;
 		myOut = new PrintStream(System.out, true);
@@ -63,10 +64,10 @@ public class AuctionCentralEmployee {
 			if(input.equals("0")){	//break the while loop, end ACE_Interface(), return control back to main class.
 				back = true;
 			}else if(input.equals("1")){
-				myOut.println("Please enter the month you wish to look at.\n ");
-				int month = myIn.nextInt();
+				myOut.println("Please enter the month you wish to look at (number between 1 to 12).\n ");
+				int month = getInt();
 				myOut.println("Please enter the year.");
-				int year = myIn.nextInt();				
+				int year = getInt();				
 				YearMonth  ym  = YearMonth.of(year, month);			
 				viewCalendar(ym);
 			}else if(input.equals("2")){
@@ -88,26 +89,17 @@ public class AuctionCentralEmployee {
 	 */
 	public void auctionList(){
 		boolean back = false;
-		String input;
 		int choice = 0;
 		while(!back){	//Auction list
 			myOut.println("Current auctions list\n\n");
-			myOut.println(myCalendar.viewCurrentAuctions());
+			myOut.println(myCalendar.getListOfCurrentAuctions());
 
-			boolean validInput = false;
-			while(!validInput){
-				myOut.println("Please enter your number of selection or 0 to go back to main menu.\n");
-				input = myIn.next();
-				try{
-					choice = Integer.parseInt(input);
-					validInput = true;
-				}catch(Exception e){
-					myOut.println("Invalid input");
-				}
-			}
+			myOut.println("Please enter your number of selection or 0 to go back to main menu.\n");
+			choice = getInt();
+			
 			if(choice == 0){	
 				back = true;
-			}else if(choice <= myCalendar.getMyCurrentAuctions().size()){
+			}else if(choice <= myCalendar.getCurrentAuctions().size()){
 				int auction = choice -1;	//save selected auction.
 
 				//sub menu, view list of items and ask user to select item to bid.
@@ -129,30 +121,13 @@ public class AuctionCentralEmployee {
 	 * ask the bidder to select an item by item ID to view the item's detail and place bid,
 	 * @param auction, the auction where the items belong.
 	 */
-	public void viewItemList(int auction)
-	{
-		boolean back = false;
-		String input;
-		int choice = 0;
-		while(!back){	//items list of the selected auction.
-			myOut.println("List of items for auction " + myCalendar.getMyCurrentAuctions().get(auction).getName() + "\n");
-			myOut.println(myCalendar.getMyCurrentAuctions().get(auction).retrieveItemList());
-
-			boolean validInput = false;
-			while(!validInput){
-				myOut.println("\nPlease enter 0 to go back to the auctions list.\n");
-				input = myIn.next();
-				try{
-					choice = Integer.parseInt(input);
-					validInput = true;
-				}catch(Exception e){
-					myOut.println("Invalid input");
-				}
-			}
-			if(choice == 0){	//break while loop go back to auction list.
-				back = true;
-			}
-		}
+	public void viewItemList(int auction){
+		
+			myOut.println("List of items for auction " + myCalendar.getCurrentAuctions().get(auction).getName() + "\n");
+			myOut.println(myCalendar.getCurrentAuctions().get(auction).retrieveItemList());
+			
+			myOut.println("\nPlease enter any key to go back to the auctions list.\n");
+			myIn.next();			
 	}
 
 	/**
@@ -167,6 +142,30 @@ public class AuctionCentralEmployee {
 	 * Views auction details.
 	 */
 	void viewCalendar(YearMonth ym) {
-		myOut.println(myCalendar.viewAuctionByMonth(ym));
+		try {
+			myOut.println(myCalendar.getAnyMonthCalendarView(ym));
+		} catch (ParseException e) {
+			myOut.print(e.getMessage());
+		}
+	}
+	
+	/**
+	 * get an integer from console input
+	 * @return an integer.
+	 */
+	private int getInt(){
+		int toreturn = 0;
+		String input;
+		boolean validInput = false;
+		while(!validInput){
+			input = myIn.next();
+			try{
+				toreturn = Integer.parseInt(input);
+				validInput = true;
+			}catch(Exception e){
+				myOut.print("Invalid input. Please try again");
+			}		
+		}
+		return toreturn;
 	}
 }

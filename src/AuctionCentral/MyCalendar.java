@@ -8,7 +8,6 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -40,7 +39,11 @@ public class MyCalendar {
 	
 	//Class variables
 	/** A list of all the current auctions.*/
-	private List<Auction> myCurrentAuctions;
+	private ArrayList<Auction> myCurrentAuctions;
+	
+	public ArrayList<Auction> getCurrentAuctions(){
+		return myCurrentAuctions;
+	}
 	/** A Scanner for input.*/
 	private Scanner myInput;
 	/** A string that holds a list of the different months*/
@@ -82,21 +85,22 @@ public class MyCalendar {
 			MoreTimeBetweenAuctionsException, MaxDaysPassedException {
 		
 		if (hasMaxAuctions()) {
-			throw new HasMaxAuctionsExceptions("");
+			throw new HasMaxAuctionsExceptions("HasMaxAuctionsExceptions\n");
 		} else if (!minDaysBetweenOrgAuctions(theCurentAuction.getMyOrg(),
 				theCurentAuction.getMyDate())) {
-			throw new MinDaysNotPassedException("");
+			throw new MinDaysNotPassedException("MinDaysNotPassedException\n");
 		} else if (hasPassedMaxDays(theCurentAuction.getMyDate())) {
-			throw new MaxDaysPassedException("");
+			throw new MaxDaysPassedException("MaxDaysPassedException\n");
 		} else if (hasMaxPer7Days(theCurentAuction.getMyDate())){
-			throw new MaxPer7DaysException("");
+			throw new MaxPer7DaysException("MaxPer7DaysException\n");
 		} else if (hasMaxPerDay(theCurentAuction.getMyDate())){
-			throw new MaxPerDayException("");
-		} else if (!hasMinTimeBetweenAuctions(theCurentAuction.getMyDate(),
-				getTimeInto24Hour(theCurentAuction.getMyStartTime()), 
-				getTimeInto24Hour(theCurentAuction.getMyEndTime()))){
-			throw new MoreTimeBetweenAuctionsException("");
-		} else {
+			throw new MaxPerDayException("MaxPerDayException\n");
+		} else if (!hasMinTimeBetweenAuctions(theCurentAuction.getMyDate(), 
+				theCurentAuction.getMyStartTime(), theCurentAuction.getMyEndTime())){
+			throw new MoreTimeBetweenAuctionsException("MoreTimeBetweenAuctionsException\n");
+		} else if(theCurentAuction.getMyDate().getTime() < CURRENTDATE.getTime()){
+			throw new MinDaysNotPassedException("Cannot add auction to the pass, please check your time and try again.\n");
+		}else{
 			addAuctionToCurrentAuctions(theCurentAuction);
 			addAuctionToOrgList(theCurentAuction);
 			addAuctionToYearMonth(theCurentAuction);
@@ -109,7 +113,7 @@ public class MyCalendar {
 	 * 
 	 * @param theTime a string representation of 12 hour time format.
 	 * @return an integer representing 24 hour time format.
-	 */
+	 *
 	protected int getTimeInto24Hour(String theTime) {
 		int time = Integer.parseInt(theTime.substring(0, theTime.length() - 2));
 		if ("pm".equals(theTime.substring(theTime.length() - 2))) {
@@ -118,6 +122,7 @@ public class MyCalendar {
 		
 		return time;
 	}
+	*/
 	
 	/**
 	 * Takes in a Date and spits out the month and year as a YearMonth obj.
@@ -129,7 +134,10 @@ public class MyCalendar {
 	protected YearMonth parseYearMonth(Date theDate) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(theDate);
-		return YearMonth.of(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH));
+		int year = cal.get(Calendar.YEAR);
+		int month = cal.get(Calendar.MONTH) + 1;
+		YearMonth ym = YearMonth.of(year, month);
+		return ym;
 	}
 	
 	/**
@@ -151,7 +159,8 @@ public class MyCalendar {
 	 * @return a long representing the days between current date and another date.
 	 */
 	protected long getDaysBetween(Date theFirstDate, Date theSecondDate) {
-		return ((theFirstDate.getTime() - theSecondDate.getTime()) * 24 * 60 * 60 * 1000);
+		long toreturn = ((theFirstDate.getTime() - theSecondDate.getTime()) /( 24 * 60 * 60 * 1000));
+		return toreturn;
 	}
 	
 	/**
@@ -173,7 +182,7 @@ public class MyCalendar {
 	 * till MAXDAYSOUT. 
 	 */
 	public boolean hasPassedMaxDays(Date theDate) {
-		return 	getDaysBetween(CURRENTDATE, theDate) < MAXDAYSOUT; 
+		return 	getDaysBetween(theDate, CURRENTDATE) > MAXDAYSOUT; 
 	}
 	
 	/**
@@ -196,8 +205,8 @@ public class MyCalendar {
 			ArrayList<Auction> checkList = myAuctionListByYearMonth.get(ym);
 			for (int i = 0; i < checkList.size() && passed; i++) {
 				if (getDaysBetween(checkList.get(i).getMyDate(), theDate) == 0) {
-					start = getTimeInto24Hour(checkList.get(i).getMyStartTime());
-					end = getTimeInto24Hour(checkList.get(i).getMyEndTime());
+					start = checkList.get(i).getMyStartTime();
+					end = checkList.get(i).getMyEndTime();
 					if (start > theEndTime) {
 						passed = theEndTime - start >= MINHOURSBETWEENTWOAUCTIONS;
 					} else if (theStartTime > end) {
@@ -222,7 +231,7 @@ public class MyCalendar {
 	public boolean hasMaxPerDay(Date theDate) {
 		YearMonth ym = parseYearMonth(theDate);
 		int days = 0;
-		boolean passed = true;
+		boolean passed = false;
 				
 		if (myAuctionListByYearMonth.containsKey(ym)) {
 			ArrayList<Auction> checkList = myAuctionListByYearMonth.get(ym);
@@ -277,8 +286,7 @@ public class MyCalendar {
 		if (myAuctionsByOrg.containsKey(theOrg)) {
 			orgAuctions = myAuctionsByOrg.get(theOrg);
 			for (int i = 0; i < orgAuctions.size() && passDays; i++) {
-				passDays = (getDaysBetween(orgAuctions.get(i).getMyDate(),
-						theDate) >= MINDAYSBETWEENAUCTIONS);
+				passDays = (getDaysBetween(orgAuctions.get(i).getMyDate(), theDate) >= MINDAYSBETWEENAUCTIONS);
 			}
 		}
 		
@@ -445,10 +453,12 @@ public class MyCalendar {
 	 * @return
 	 */
 	private ArrayList<Auction> sortList(ArrayList<Auction> toSort) {
+		
 		ArrayList<Auction> sortedList = new ArrayList<Auction>();
+		/**
 		boolean sorted = false;
 		
-		sortedList.clear();
+		//sortedList.clear();
 		if (toSort.size() > 1) {
 			for (int i = 0; i < toSort.size() && !sorted; i++) {
 				sorted = true;
@@ -468,7 +478,7 @@ public class MyCalendar {
 				sortedList.clear();
 			}
 		} 
-		
+		*/
 		copyList(sortedList, toSort);
 		
 		return sortedList;
