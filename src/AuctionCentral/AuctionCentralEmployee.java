@@ -31,6 +31,8 @@ public class AuctionCentralEmployee {
 
 	/** A printstream for a shortcut to print out to the console.*/
 	private static PrintStream myOut ;
+	
+	private String breakLine = "-----------------------------------------------------------------------------------------\n";
 
 	/**
 	 * Constructor.
@@ -61,6 +63,7 @@ public class AuctionCentralEmployee {
 			myOut.println("Please enter a command:\n0:log out\n1: view a monthly calendar.\n"
 					+ "2: view the list of auctions\n");
 			input = myIn.next();
+			myOut.print(breakLine);
 			if(input.equals("0")){	//break the while loop, end ACE_Interface(), return control back to main class.
 				back = true;
 			}else if(input.equals("1")){
@@ -127,7 +130,8 @@ public class AuctionCentralEmployee {
 			myOut.println(myCalendar.getCurrentAuctions().get(auction).retrieveItemList());
 			
 			myOut.println("\nPlease enter any key to go back to the auctions list.\n");
-			myIn.next();			
+			myIn.next();	
+			myOut.print(breakLine);
 	}
 
 	/**
@@ -159,6 +163,7 @@ public class AuctionCentralEmployee {
 		boolean validInput = false;
 		while(!validInput){
 			input = myIn.next();
+			myOut.print(breakLine);
 			try{
 				toreturn = Integer.parseInt(input);
 				validInput = true;

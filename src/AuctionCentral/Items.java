@@ -13,6 +13,9 @@ public class Items {
 	private String myDescription;
 	private double minBid;
 	private ArrayList<Bids> bidList = new ArrayList<Bids>();
+	public ArrayList<Bids> getBidList(){
+		return bidList;
+	}
 
 
 	/**
@@ -63,10 +66,11 @@ public class Items {
 	 * @param newBid
 	 * @return
 	 */
-	public boolean editBid(String bidder, double newBid){
+	public boolean editBid(String bidder, double newBid) throws PlaceBidException{
 		boolean bidderExist = false;
 		for(int i = 0; i <bidList.size(); i++){
 			if(bidList.get(i).getBidder() == bidder){
+				if(newBid < minBid) throw new PlaceBidException("Your bid cannot less than the minimum bid.\n");
 				bidList.get(i).setBidValue(newBid);
 				bidderExist = true;
 			}			
@@ -129,53 +133,6 @@ public class Items {
 	}
 
 }
-class Bids{
-	private String bidder;
-	private double bidValue;
 
-	Bids(String bidder, double bidValue){
-		this.bidder = bidder;
-		this.bidValue = bidValue;
-	}
-	/**
-	 * @return the bidder
-	 */
-	public String getBidder() {
-		return bidder;
-	}
-	/**
-	 * @param bidder the bidder to set
-	 */
-	public void setBidder(String bidder) {
-		this.bidder = bidder;
-	}
-	/**
-	 * @return the bidValue
-	 */
-	public double getBidValue() {
-		return bidValue;
-	}
-	/**
-	 * @param bidValue the bidValue to set
-	 */
-	public void setBidValue(double bidValue) {
-		this.bidValue = bidValue;
-	}
 
-}
 
-/**
- * Place bid exception class.
- * 
- * @author Tan Pham
- *
- */
-class PlaceBidException extends Exception {
-
-	private static final long serialVersionUID = 1L;
-
-	public PlaceBidException(String arg0) {
-		super(arg0);
-	}
-
-}

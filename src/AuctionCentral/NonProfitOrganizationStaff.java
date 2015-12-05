@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Scanner;
@@ -29,6 +30,8 @@ public class NonProfitOrganizationStaff {
 
 	/** A print stream for a shortcut to print out to the console.*/
 	private static PrintStream myOut ;
+
+	private String breakLine = "-----------------------------------------------------------------------------------------\n";
 
 	/**
 	 * Holds the calendar for use by ACE.
@@ -56,8 +59,8 @@ public class NonProfitOrganizationStaff {
 	public NonProfitOrganizationStaff(MyCalendar calendar, String name) {
 		myCalendar = calendar;
 		staffName = name;
-		loadStaff();
 		myOut = new PrintStream(System.out, true);
+		loadStaff();
 		myIn = new Scanner(System.in);
 		staffInterface();
 	}
@@ -65,7 +68,7 @@ public class NonProfitOrganizationStaff {
 	private void loadStaff(){
 		String date = "";
 		try {
-			myIn = new Scanner(new File(staffName + ".txt"));			
+			myIn = new Scanner(new File(staffName + ".txt"));
 			myOrganizationName = myIn.next();
 			if(myIn.hasNext()) date = myIn.next();
 			myIn.close();
@@ -73,7 +76,7 @@ public class NonProfitOrganizationStaff {
 			myOut.println("staff not found, login as new staff");
 		}
 		for(int i = 0; i < myCalendar.getCurrentAuctions().size(); i++){
-			if(myCalendar.getCurrentAuctions().get(i).getName().equals(myOrganizationName + " - " + date)){
+			if(myCalendar.getCurrentAuctions().get(i).getName().equals(myOrganizationName + "-" + date)){
 				currentAuction = myCalendar.getCurrentAuctions().get(i);
 			}
 		}
@@ -88,7 +91,9 @@ public class NonProfitOrganizationStaff {
 			myOut.println("Please enter a command:\n0:log out\n1: schedule new auction.\n"
 					+ "2: view the current auction.\n");
 			input = myIn.next();
+			myOut.print(breakLine);
 			if(input.equals("0")){	//break the while loop, end NPO_Interface(), return control back to main class.
+				logout();
 				back = true;
 			}else if(input.equals("1")){
 				addNewAuction();
@@ -101,6 +106,20 @@ public class NonProfitOrganizationStaff {
 
 	}
 
+	public void logout(){
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter(staffName + ".txt");
+
+			writer.print(currentAuction.getMyOrg() + " ");
+
+			writer.println(currentAuction.getDateToString());
+
+			writer.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Adds a new auction to the calendar for this non profit organization.
@@ -126,10 +145,7 @@ public class NonProfitOrganizationStaff {
 			currentAuction = auc;
 			myOut.println("You have successfully added a new acution.\n");
 			viewCurrentAuction();
-		} catch (HasMaxAuctionsExceptions | MinDaysNotPassedException
-				| MaxPer7DaysException | MaxPerDayException
-				| MoreTimeBetweenAuctionsException | MaxDaysPassedException e) {
-			// TODO Auto-generated catch block
+		} catch (AddAuctionException e) {
 			myOut.print(e.getMessage());
 		}
 
@@ -199,9 +215,9 @@ public class NonProfitOrganizationStaff {
 		}else{
 			myOut.println("Current auction details:");
 			myOut.println("Auction name: " + currentAuction.getName());
-			myOut.println("Auction date: " + currentAuction.getMyDate());
-			myOut.println("Auction start time: " + currentAuction.getMyStartTime());
-			myOut.println("Auction end time: " + currentAuction.getMyEndTime());
+			myOut.println("Auction date: " + currentAuction.getDateToString());
+			myOut.println("Auction start time: " + currentAuction.getMyStartTime() + ":00");
+			myOut.println("Auction end time: " + currentAuction.getMyEndTime() + ":00");
 
 			String input;
 			boolean back = false;
@@ -209,6 +225,7 @@ public class NonProfitOrganizationStaff {
 				myOut.println("Please enter a command:\n0: go back.\n1: edit auction infomation.\n"
 						+ "2: add new item.\n3: view current items");
 				input = myIn.next();
+				myOut.print(breakLine);
 				if(input.equals("0")){	
 					back = true;
 				}else if(input.equals("1")){
@@ -234,25 +251,54 @@ public class NonProfitOrganizationStaff {
 			myOut.println("Please enter a command:\n0: go back.\n1: edit auction date.\n"
 					+ "2: edit auction start time.\n3: edit auction endtime");
 			input = myIn.next();
+			myOut.print(breakLine);
 			if(input.equals("0")){	
 				back = true;
 			}else if(input.equals("1")){
 				myOut.println("Please enter new date.");			
 				Date newDate = getDate();
-				currentAuction.setMyDate(newDate);
-				myOut.println("edit date successful.");
+				Auction editedAuction = new Auction(currentAuction.getMyOrg(), currentAuction.getMyDate(),
+						currentAuction.getMyStartTime(), currentAuction.getMyEndTime());
+				editedAuction.setMyDate(newDate);
+
+				try {
+					myCalendar.editAuction(editedAuction);
+					currentAuction = editedAuction;
+					myOut.println("edit date successful.");
+				} catch (AddAuctionException e) {
+					myOut.print(e.getMessage());
+				}
+
 				break;
 			}else if(input.equals("2")){
 				myOut.println("Please enter the start time (must be a number between 0 and 23, inclusive");
 				int newTime = getTime();
-				currentAuction.setMyStartTime(newTime);
-				myOut.println("edit start time successful.");
+				Auction editedAuction = new Auction(currentAuction.getMyOrg(), currentAuction.getMyDate(),
+						currentAuction.getMyStartTime(), currentAuction.getMyEndTime());
+				editedAuction.setMyStartTime(newTime);
+				try {
+					myCalendar.editAuction(currentAuction);
+					currentAuction = editedAuction;
+					myOut.println("edit start time successful.");
+				} catch (AddAuctionException e) {
+					myOut.print(e.getMessage());
+				}
+
 				break;
 			}else if(input.equals("3")){
 				myOut.println("Please enter the start time (must be a number between 0 and 23, inclusive");
 				int newTime = getTime();
-				currentAuction.setMyEndTime(newTime);
-				myOut.println("edit end time successful.");
+				Auction editedAuction = new Auction(currentAuction.getMyOrg(), currentAuction.getMyDate(),
+						currentAuction.getMyStartTime(), currentAuction.getMyEndTime());
+				editedAuction.setMyEndTime(newTime);
+				try {
+					myCalendar.editAuction(currentAuction);
+					currentAuction = editedAuction;
+					myOut.println("edit end time successful.");
+				} catch (AddAuctionException e) {
+					myOut.print(e.getMessage());
+				}
+
 				break;
 			}else{
 				myOut.println("Invalid input");
@@ -290,6 +336,7 @@ public class NonProfitOrganizationStaff {
 		String toReturn = "";
 		try {
 			toReturn = br.readLine();
+			myOut.print(breakLine);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -306,6 +353,7 @@ public class NonProfitOrganizationStaff {
 		boolean validInput = false;
 		while(!validInput){
 			input = myIn.next();
+			myOut.print(breakLine);
 			try{
 				toreturn = Double.parseDouble(input);
 				validInput = true;
@@ -326,6 +374,7 @@ public class NonProfitOrganizationStaff {
 		boolean validInput = false;
 		while(!validInput){
 			input = myIn.next();
+			myOut.print(breakLine);
 			try{
 				toreturn = Integer.parseInt(input);
 				validInput = true;
@@ -374,6 +423,7 @@ public class NonProfitOrganizationStaff {
 			myOut.println("Please enter a command:\n0: go back.\n1: edit item name.\n"
 					+ "2: edit item description.\n3: edit item min bid");
 			input = myIn.next();
+			myOut.print(breakLine);
 			if(input.equals("0")){	
 				back = true;
 			}else if(input.equals("1")){

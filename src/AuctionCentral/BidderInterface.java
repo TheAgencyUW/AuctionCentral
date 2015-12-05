@@ -26,6 +26,8 @@ public class BidderInterface
 	 * the console.
 	 * */
 	private static Scanner myIn;
+	
+	private String breakLine = "-----------------------------------------------------------------------------------------\n";
 
 	//To store the calendar which contents all the auction passing from main.
 	private MyCalendar myCalendar;
@@ -53,8 +55,6 @@ public class BidderInterface
 		myOut = new PrintStream(System.out, true);
 		myIn = new Scanner(System.in);
 		
-		userInterface();
-
 	}
 
 	/**
@@ -63,14 +63,16 @@ public class BidderInterface
 	private void loadBidder(){
 		int itemID;
 		String auction;
+		double minBid;
 		double bidPrice;
 		try {
 			myIn = new Scanner(new File(bidder.getBidderName() + ".txt"));
 			while (myIn.hasNext()) {
 				itemID = myIn.nextInt();
 				auction = myIn.next();
+				minBid = myIn.nextDouble();
 				bidPrice = myIn.nextDouble();
-				bidder.enterBid(itemID, auction, bidPrice);
+				bidder.enterBid(itemID, auction, minBid, bidPrice);
 			}
 			myIn.close();
 		} catch (FileNotFoundException e) {
@@ -81,13 +83,14 @@ public class BidderInterface
 	/**
 	 * the bidder interface.
 	 */
-	private void userInterface(){
+	public void userInterface(){
 		String input;
 		boolean back = false;
 		while(!back){
 			myOut.println("Welcome " + bidder.getBidderName());
 			myOut.println("Please enter a command:\n0:log out\n1: view bided items and make change\n2: view current auctions.\n");
 			input = myIn.next();
+			myOut.print(breakLine);
 			if(input.equals("0"))
 			{	//break the while loop, end bidderInterface(), return control back to main class.
 				logout(bidder.getBidderName());
@@ -115,14 +118,14 @@ public class BidderInterface
 	 * save the bidder info to a file for next time use
 	 * logout and return control the main class.
 	 */
-	private void logout(String bidderName)
-	{
+	private void logout(String bidderName){
 		PrintWriter writer;
 		try {
 			writer = new PrintWriter(bidderName + ".txt");
 			for(int i = 0; i < bidder.getBidList().size(); i ++){
 				writer.print(bidder.getBidList().get(i).itemID + " ");
 				writer.print(bidder.getBidList().get(i).auctionName + " ");
+				writer.println(bidder.getBidList().get(i).minBid + " ");
 				writer.println(bidder.getBidList().get(i).bidPrice);
 			}		
 			writer.close();
@@ -161,8 +164,10 @@ public class BidderInterface
 
 				if(newBid == 0.0){
 					bidder.cancelBid(itemID, auction);
-				}else{
-					bidder.changeBid(itemID, auction, newBid);
+				}else{					
+					if(!bidder.changeBid(itemID, auction, newBid)){
+						myOut.println("Your new bid cannot less than minimum bid.\n");
+					}
 				}
 				myOut.println("Your item has been changed successful as below.\n");
 			}else{
@@ -257,7 +262,8 @@ public class BidderInterface
 				//add this item to the bidder's bided list.
 				try {
 					myCurrentAuctions.get(aucID).getItem(item.getId()).addBid(bidder.getBidderName(), bid);
-					bidder.enterBid(item.getId(), myCurrentAuctions.get(aucID).getName(), bid);
+					bidder.enterBid(item.getId(), myCurrentAuctions.get(aucID).getName(), item.getMinBid(), bid);
+					myOut.println("Your bid has placed successful.");
 					break;
 				} catch (PlaceBidException e) {
 					myOut.println(e.getMessage());
@@ -280,6 +286,7 @@ public class BidderInterface
 		boolean validInput = false;
 		while(!validInput){
 			input = myIn.next();
+			myOut.print(breakLine);
 			try{
 				toreturn = Double.parseDouble(input);
 				validInput = true;
@@ -300,6 +307,7 @@ public class BidderInterface
 		boolean validInput = false;
 		while(!validInput){
 			input = myIn.next();
+			myOut.print(breakLine);
 			try{
 				toreturn = Integer.parseInt(input);
 				validInput = true;

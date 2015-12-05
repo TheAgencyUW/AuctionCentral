@@ -61,13 +61,15 @@ public class Bidder
 	 * @param auc
 	 * @param newBid
 	 */
-	protected void changeBid(int itemID, String auction, double newBid)
-	{	
+	protected boolean changeBid(int itemID, String auction, double newBid){	
+		boolean successful = false;
 		for(int j = 0; j < myBidList.size(); j++){
-			if(myBidList.get(j).auctionName == auction && myBidList.get(j).itemID == itemID){
+			if(myBidList.get(j).auctionName == auction && myBidList.get(j).itemID == itemID && newBid > myBidList.get(itemID).minBid){
 				myBidList.get(j).bidPrice = newBid;
+				successful = true;
 			}
 		}
+		return successful;
 	}
 
 	/**
@@ -93,9 +95,9 @@ public class Bidder
 	 * 
 	 * add an item to the bidder's bid list
 	 */
-	protected void enterBid(int item, String auc, double bid)
+	protected void enterBid(int item, String auc, double min, double bid)
 	{
-		BidedItem bidedItem = new BidedItem(item, auc, bid);
+		BidedItem bidedItem = new BidedItem(item, auc, min, bid);
 		myBidList.add(bidedItem);
 	}
 }
@@ -107,14 +109,16 @@ public class Bidder
 class BidedItem{
 	int itemID;
 	String auctionName;
+	double minBid;
 	double bidPrice;
-	public BidedItem(int itemID, String aucName, double bid){
+	public BidedItem(int itemID, String aucName, double minBid, double bid){
 		this.itemID = itemID;
 		this.auctionName = aucName;
+		this.minBid = minBid;
 		this.bidPrice = bid;
 	}
 	public String toString(){
-		return "Item ID: " + itemID + " from auction " + auctionName + ", bided value: " + bidPrice +"\n";
+		return "Item ID: " + itemID + " from auction " + auctionName + "minimum bid: " + minBid + ", bided value: " + bidPrice +"\n";
 	}
 }
 

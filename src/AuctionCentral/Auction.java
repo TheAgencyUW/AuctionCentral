@@ -3,6 +3,7 @@ package AuctionCentral;
  * @author Tan Pham
  */
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -12,8 +13,9 @@ public class Auction {
 	private int myStartTime;
 	private int myEndTime;
 	private Date myDate;
-	private ArrayList<Items> myItems = new ArrayList<Items>();
+	private ArrayList<Items> myItems;
 	private int ItemID;
+	private SimpleDateFormat fmDate;
 	
 	/**
 	 * Constructor.
@@ -23,12 +25,29 @@ public class Auction {
 	 * @param endTime
 	 */
 	public Auction(String org, Date date, int startTime, int endTime){
+		fmDate = new SimpleDateFormat("MM/dd/YYYY");
 		myOrg = org;
 		myStartTime = startTime;
 		myEndTime = endTime;
 		myDate = date;
-		myName = myOrg + " - " + myDate;
+		myName = myOrg + "-" + fmDate.format(myDate);
 		ItemID = 1;
+		myItems = new ArrayList<Items>();
+		
+	}
+	
+	public Auction(){
+		
+	}
+	
+	public void copyAuction(Auction auction){
+		myOrg = auction.myOrg;
+		myDate = auction.myDate;
+		myStartTime = auction.myStartTime;
+		myEndTime = auction.myEndTime;
+		myName = auction.myName;
+		ItemID = auction.ItemID;
+		myItems = auction.myItems;
 	}
 	
 	
@@ -151,11 +170,19 @@ public class Auction {
 	public Date getMyDate() {
 		return myDate;
 	}
+	
+	public String getDateToString(){
+		return fmDate.format(myDate);
+	}
 	/**
 	 * @param myDate the myDate to set
 	 */
 	public void setMyDate(Date myDate) {
 		this.myDate = myDate;
+	}
+	
+	public String toString(){
+		return myName + ", Date: " + getDateToString() + ", Start Time: " + myStartTime + ", End Time: " + myEndTime + "\n";
 	}
 	
 }

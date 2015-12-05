@@ -103,12 +103,13 @@ public class Main {
 		myChecked = false;
 		switch(myCurrentUserRole){
 		case "bidder" : BidderInterface bidder = new BidderInterface(myCalendar, myCurrentUser);
+						bidder.userInterface();
 						break;
 		case "npo" 	  : NonProfitOrganizationStaff npo = new NonProfitOrganizationStaff(myCalendar, myCurrentUser);
 						npo.staffInterface();
 						break;
 		case "ace"    : AuctionCentralEmployee ace = new AuctionCentralEmployee(myCalendar, myCurrentUser);
-		ace.employeeInterface();
+						ace.employeeInterface();
 			break;
 		}
 	}
@@ -137,9 +138,7 @@ public class Main {
 	private static void loadCalendar(){
 		try {
 			myCalendar.addAuction(new Auction("auction1", new GregorianCalendar(2016, java.util.Calendar.JANUARY, 1).getTime(), 8, 13));
-		} catch (HasMaxAuctionsExceptions | MinDaysNotPassedException
-				| MaxPer7DaysException | MaxPerDayException
-				| MoreTimeBetweenAuctionsException | MaxDaysPassedException e) {
+		} catch (AddAuctionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -147,9 +146,7 @@ public class Main {
 		myCalendar.getCurrentAuctions().get(0).addItem("item2", "item 2 from auction 1", 10.0);
 		try {
 			myCalendar.addAuction(new Auction("auction2", new GregorianCalendar(2015, java.util.Calendar.DECEMBER, 25).getTime(), 9, 14));
-		} catch (HasMaxAuctionsExceptions | MinDaysNotPassedException
-				| MaxPer7DaysException | MaxPerDayException
-				| MoreTimeBetweenAuctionsException | MaxDaysPassedException e) {
+		} catch (AddAuctionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
