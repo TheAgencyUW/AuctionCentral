@@ -22,7 +22,6 @@ public class NonProfitOrganizationStaff {
 	 */
 	private static Scanner myIn;
 
-
 	/**
 	 * a buffer to read in a complete line of input.
 	 */
@@ -62,7 +61,6 @@ public class NonProfitOrganizationStaff {
 		myOut = new PrintStream(System.out, true);
 		loadStaff();
 		myIn = new Scanner(System.in);
-		staffInterface();
 	}
 
 	private void loadStaff(){
@@ -110,11 +108,10 @@ public class NonProfitOrganizationStaff {
 		PrintWriter writer;
 		try {
 			writer = new PrintWriter(staffName + ".txt");
-
-			writer.print(currentAuction.getMyOrg() + " ");
-
-			writer.println(currentAuction.getDateToString());
-
+			writer.print(myOrganizationName + " ");
+			if(currentAuction!=null){
+				writer.println(currentAuction.getDateToString());
+			}
 			writer.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -141,8 +138,8 @@ public class NonProfitOrganizationStaff {
 		Auction auc = new Auction(myOrganizationName, date, startTime, endTime);
 
 		try {
-			myCalendar.addAuction(auc);
 			currentAuction = auc;
+			myCalendar.addAuction(auc);
 			myOut.println("You have successfully added a new acution.\n");
 			viewCurrentAuction();
 		} catch (AddAuctionException e) {
