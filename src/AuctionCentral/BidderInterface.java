@@ -52,8 +52,6 @@ public class BidderInterface
 		myOut = new PrintStream(System.out, true);
 		myIn = new Scanner(System.in);
 		
-		userInterface();
-
 	}
 
 	/**
@@ -62,14 +60,16 @@ public class BidderInterface
 	private void loadBidder(){
 		int itemID;
 		String auction;
+		double minBid;
 		double bidPrice;
 		try {
 			myIn = new Scanner(new File(bidder.getBidderName() + ".txt"));
 			while (myIn.hasNext()) {
 				itemID = myIn.nextInt();
 				auction = myIn.next();
+				minBid = myIn.nextDouble();
 				bidPrice = myIn.nextDouble();
-				bidder.enterBid(itemID, auction, bidPrice);
+				bidder.enterBid(itemID, auction, minBid, bidPrice);
 			}
 			myIn.close();
 		} catch (FileNotFoundException e) {
@@ -80,7 +80,7 @@ public class BidderInterface
 	/**
 	 * the bidder interface.
 	 */
-	private void userInterface(){
+	public void userInterface(){
 		String input;
 		boolean back = false;
 		while(!back){
@@ -254,7 +254,7 @@ public class BidderInterface
 				//add this item to the bidder's bided list.
 				try {
 					myCurrentAuction.getItem(item.getId()).addBid(bidder.getBidderName(), bid);
-					bidder.enterBid(item.getId(), myCurrentAuction.getName(), bid);
+					bidder.enterBid(item.getId(), myCurrentAuction.getName(), item.getMinBid(), bid);
 					break;
 				} catch (PlaceBidException e) {
 					myOut.println(e.getMessage());

@@ -1,7 +1,13 @@
 package AuctionCentral;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.time.YearMonth;
@@ -55,16 +61,89 @@ public class MyCalendar implements Serializable{
 	private Map<YearMonth, ArrayList<Auction>> myAuctionListByYearMonth;
 	/** A map that holds a list of all the auctions by the different organization.*/
 	private Map<String, ArrayList<Auction>> myAuctionsByOrg;
+	
+	private String calName;
 
 	//Class constructors
-	public MyCalendar() {
+	public MyCalendar(String name) {
 		myCurrentAuctions = new ArrayList<Auction>();
 		myAuctionListByYearMonth = new TreeMap<YearMonth, ArrayList<Auction>>();
 		myAuctionsByOrg = new TreeMap<String, ArrayList<Auction>>();
 		myInput = null;
-
+		calName = name;
+		loadCalendar(this);
 		fillMonth();
 		fillDays();
+	}
+	
+
+	/**
+	 * 
+	 */
+	public void saveCalendarState() {
+		try {
+			FileOutputStream fileOut = new FileOutputStream(calName + ".ser");
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(this);
+			out.close();
+			fileOut.close();
+		} catch(IOException i){
+		
+		}
+	}
+	/**
+	 * 
+	 */
+	private void loadCalendar(MyCalendar cal){
+		try {
+			FileInputStream fileIn = new FileInputStream(calName + ".ser");
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			cal = (MyCalendar) in.readObject();
+			in.close();
+			fileIn.close();
+		} catch (ClassNotFoundException | IOException c) {
+			makeNewCalendar(calName + ".txt");
+		}
+	}
+
+	/**
+	 * 
+	 */
+	private void makeNewCalendar(String file) {
+		PrintStream myOut = new PrintStream(System.out, true);
+		/** 
+		 * A scanner that is used to scan in different files and read from 
+		 * the console.
+		 * */
+		Scanner myIn;
+		String orgName;
+		int year, month, day, start, end;
+		double item1Bid, item2Bid;
+		try {
+			myIn = new Scanner(new File(file));
+			while (myIn.hasNextLine()&&myIn.hasNext()) {
+				orgName = myIn.next();
+				year = myIn.nextInt();
+				month = myIn.nextInt() - 1;
+				day = myIn.nextInt();
+				start = myIn.nextInt();
+				end = myIn.nextInt();
+				item1Bid = myIn.nextDouble();
+				item2Bid = myIn.nextDouble();
+				Auction toAdd = new Auction(orgName, new GregorianCalendar(year, month, day).getTime(), start, end);
+				toAdd.addItem("item1", "item 1 from auction 1", item1Bid);
+				toAdd.addItem("item2", "item 2 from auction 1", item2Bid);
+				try {
+					addAuction(toAdd);
+				} catch (AddAuctionException e) {
+					myOut.print(e.getMessage());
+				}
+			}
+			
+			myIn.close();
+		} catch (FileNotFoundException e) {
+			myOut.println("No calendar found");
+		}
 	}
 
 	//Class methods
@@ -80,31 +159,52 @@ public class MyCalendar implements Serializable{
 	 * @throws MaxDaysPassedException 
 	 * @throws MoreThan90Exception 
 	 */
-	public void addAuction(Auction theCurentAuction) 
-			throws HasMaxAuctionsExceptions, MinDaysNotPassedException,
-			MaxPer7DaysException, MaxPerDayException, 
-			MoreTimeBetweenAuctionsException, MaxDaysPassedException {
+	public boolean addAuction(Auction theCurentAuction) 
+			throws AddAuctionException {
 
 		if (hasMaxAuctions()) {
-			throw new HasMaxAuctionsExceptions("HasMaxAuctionsExceptions\n");
+			throw new AddAuctionException("HasMaxAuctionsExceptions\nWe already reached our maximum of event at this time.\n"
+					+ "Please try to contact us in the next month.\n");
 		} else if (!minDaysBetweenOrgAuctions(theCurentAuction.getMyOrg(),
 				theCurentAuction.getMyDate())) {
-			throw new MinDaysNotPassedException("MinDaysNotPassedException\n");
+			throw new AddAuctionException("MinDaysNotPassedException\n You already had an auction with us this year.\n"
+					+ "Please try to contact us again next year.\n");
 		} else if (hasPassedMaxDays(theCurentAuction.getMyDate())) {
-			throw new MaxDaysPassedException("MaxDaysPassedException\n");
+			throw new AddAuctionException("MaxDaysPassedException\nThe day you have chosen is to far to the future.\n"
+					+ "Please select a day within 90 calendar days from now.\n");
 		} else if (hasMaxPer7Days(theCurentAuction.getMyDate())){
-			throw new MaxPer7DaysException("MaxPer7DaysException\n");
+			throw new AddAuctionException("MaxPer7DaysException\n We have reached our maximum number of auction of this week.\n"
+					+ "Please select a different day.");
 		} else if (hasMaxPerDay(theCurentAuction.getMyDate())){
-			throw new MaxPerDayException("MaxPerDayException\n");
+			throw new AddAuctionException("MaxPerDayException\nWe have reached our maxinum number of auction for this day.\n"
+					+ "Please select another day.");
 		} else if (!hasMinTimeBetweenAuctions(theCurentAuction.getMyDate(), 
 				theCurentAuction.getMyStartTime(), theCurentAuction.getMyEndTime())){
-			throw new MoreTimeBetweenAuctionsException("MoreTimeBetweenAuctionsException\n");
+			throw new AddAuctionException("MoreTimeBetweenAuctionsException\nYour chosen time is too close to the auction befor/after.\n"
+					+ "Please select a different time.");
 		} else if(theCurentAuction.getMyDate().getTime() < CURRENT_DATE.getTime()){
-			throw new MinDaysNotPassedException("Cannot add auction to the pass, please check your time and try again.\n");
+			throw new AddAuctionException("PassDateException\nCannot add auction to the pass, please check your date and try again.\n");
 		}else{
 			addAuctionToCurrentAuctions(theCurentAuction);
 			addAuctionToOrgList(theCurentAuction);
 			addAuctionToYearMonth(theCurentAuction);
+			return true;
+		}
+	}
+
+	public void editAuction(Auction auction) throws AddAuctionException{
+		for(int i = 0; i < myCurrentAuctions.size(); i++){
+			if(myCurrentAuctions.get(i).getName().equals(auction.getName())){	
+				Auction temp = myCurrentAuctions.remove(i);
+				removeAuctionFromYearMonth(temp);
+				removeAuctionFromOrgList(temp);
+				if(!addAuction( auction)){
+					myCurrentAuctions.add(temp);
+					addAuctionToOrgList(temp);
+					addAuctionToYearMonth(temp);
+				};
+
+			}
 		}
 	}
 
@@ -132,7 +232,7 @@ public class MyCalendar implements Serializable{
 	 * @return a YearMonth object that has the year and month of the date that
 	 * was passed in.
 	 */
-	protected YearMonth parseYearMonth(Date theDate) {
+	public YearMonth parseYearMonth(Date theDate) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(theDate);
 		int year = cal.get(Calendar.YEAR);
@@ -146,7 +246,7 @@ public class MyCalendar implements Serializable{
 	 * @param theDate of the auction that you want to add.
 	 * @return
 	 */
-	protected int getDayFromDate(Date theDate) {
+	public int getDayFromDate(Date theDate) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(theDate);
 		return cal.get(Calendar.DAY_OF_MONTH);
@@ -159,7 +259,7 @@ public class MyCalendar implements Serializable{
 	 * current date.
 	 * @return a long representing the days between current date and another date.
 	 */
-	protected long getDaysBetween(Date theFirstDate, Date theSecondDate) {
+	public long getDaysBetween(Date theFirstDate, Date theSecondDate) {
 		long toreturn = ((theFirstDate.getTime() - theSecondDate.getTime()) /( 24 * 60 * 60 * 1000));
 		return toreturn;
 	}
@@ -204,14 +304,14 @@ public class MyCalendar implements Serializable{
 
 		if (myAuctionListByYearMonth.containsKey(ym)) {
 			ArrayList<Auction> checkList = myAuctionListByYearMonth.get(ym);
-			for (int i = 0; i < checkList.size() && passed; i++) {
+			for (int i = 0; i < checkList.size(); i++) {
 				if (getDaysBetween(checkList.get(i).getMyDate(), theDate) == 0) {
 					start = checkList.get(i).getMyStartTime();
 					end = checkList.get(i).getMyEndTime();
 					if (start > theEndTime) {
-						passed = theEndTime - start >= MIN_HOURS_BETWEEN_TWO_AUCTIONS;
+						passed = start - theEndTime >= MIN_HOURS_BETWEEN_TWO_AUCTIONS;
 					} else if (theStartTime > end) {
-						passed = end - theStartTime >= MIN_HOURS_BETWEEN_TWO_AUCTIONS;
+						passed =  theStartTime - end >= MIN_HOURS_BETWEEN_TWO_AUCTIONS;
 					} else {
 						passed = false;
 					}
@@ -236,12 +336,12 @@ public class MyCalendar implements Serializable{
 
 		if (myAuctionListByYearMonth.containsKey(ym)) {
 			ArrayList<Auction> checkList = myAuctionListByYearMonth.get(ym);
-			for (int i = 0; i < checkList.size() && passed; i++) {
+			for (int i = 0; i < checkList.size(); i++) {
 				if (getDaysBetween(checkList.get(i).getMyDate(), theDate) == 0) {
 					days++;
 				}
-				passed = (days >= MAX_AUCTIONS_PER_DAY);
 			}
+			passed = (days >= MAX_AUCTIONS_PER_DAY);
 		}
 
 		return passed;
@@ -253,22 +353,20 @@ public class MyCalendar implements Serializable{
 	 * @return
 	 */
 	public boolean hasMaxPer7Days(Date theDate) {
-		YearMonth ym = parseYearMonth(theDate);
 		int weekCount = 0;
 		int daysBetween = 0;
 		boolean passed = false;
 
-		if (myAuctionListByYearMonth.containsKey(ym)) {
-			ArrayList<Auction> checkList = myAuctionListByYearMonth.get(ym);
-			for (int i = 0; i < checkList.size() && !passed; i++) {
+			ArrayList<Auction> checkList = myCurrentAuctions;
+			for (int i = 0; i < checkList.size(); i++) {
 				daysBetween = (int) getDaysBetween(checkList.get(i).getMyDate(), theDate);
 
 				if (daysBetween >= MAX_DAYS_BEFORE_CHECK && daysBetween <= MAX_DAYS_AFTER_CHECK) {
 					weekCount++;
 				}
-				passed = (weekCount >= MAX_PER_7_DAYS);
+				
 			}
-		}
+		passed = (weekCount >= MAX_PER_7_DAYS);
 
 		return passed;
 	}
@@ -286,8 +384,10 @@ public class MyCalendar implements Serializable{
 
 		if (myAuctionsByOrg.containsKey(theOrg)) {
 			orgAuctions = myAuctionsByOrg.get(theOrg);
-			for (int i = 0; i < orgAuctions.size() && passDays; i++) {
-				passDays = (getDaysBetween(orgAuctions.get(i).getMyDate(), theDate) >= MIN_DAYS_BETWEEN_AUCTIONS);
+			for (int i = 0; i < orgAuctions.size(); i++) {
+				if(getDaysBetween(theDate, orgAuctions.get(i).getMyDate()) <= MIN_DAYS_BETWEEN_AUCTIONS){
+					passDays = false;
+				}
 			}
 		}
 
@@ -306,8 +406,7 @@ public class MyCalendar implements Serializable{
 		for (int i = 0; i < myCurrentAuctions.size(); i++) {
 			sb.append(i + 1);
 			sb.append(") ");
-			sb.append(myCurrentAuctions.get(i).getName());
-			sb.append("\n");
+			sb.append(myCurrentAuctions.get(i).toString());
 		}
 
 		return sb.toString();
@@ -320,6 +419,15 @@ public class MyCalendar implements Serializable{
 		System.out.println(getListOfCurrentAuctions());
 	}
 
+	/**
+	 * Used to get the size of the current auction list.
+	 * 
+	 * @return an integer that is the size of the current auction list.
+	 */
+	public int getSizeOfCurrentAuction() {
+		return myCurrentAuctions.size();
+	}
+	
 	/**
 	 * Used to get a specific auction from the list of current auctions using the
 	 * correlated index from getListOfCurrentAuctions. 
@@ -335,16 +443,7 @@ public class MyCalendar implements Serializable{
 		}
 		return temp;
 	}
-
-	/**
-	 * Used to get the size of the current auction list.
-	 * 
-	 * @return an integer that is the size of the current auction list.
-	 */
-	public int getSizeOfCurrentAuction() {
-		return myCurrentAuctions.size();
-	}
-
+	
 	/**
 	 * Creates a string representation of the current month with the different
 	 * auctions put in.
@@ -426,7 +525,7 @@ public class MyCalendar implements Serializable{
 							if (getDaysBetween(checkDate, currAuctionList.get
 									(num).getMyDate()) == 0) {
 								sb.append(String.format("%2d. %7s", auctionCount, 
-										currAuctionList.get(auctionCount - 1).getMyOrg().substring(0, 7)));
+										currAuctionList.get(auctionCount - 1).getMyOrg()));
 								auctionCount++;
 								j += 10;
 							} else {
@@ -474,48 +573,6 @@ public class MyCalendar implements Serializable{
 		System.out.println(getCurrentMonthCalendarView());
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param theAuctionIndex
-	 * @return
-	 */
-	public Auction getAuctionFromCurrentMonth(int theAuctionIndex) {
-		return getAuctionFromYearMonth(YearMonth.now(), theAuctionIndex);
-	}
-
-	/**
-	 * 
-	 * 
-	 * @param theYearMonth
-	 * @param theAuctionIndex
-	 * @return
-	 */
-	private Auction getAuctionFromYearMonth(YearMonth theYearMonth, int theAuctionIndex) {
-		Auction temp = null;
-		ArrayList<Auction> checkList = null;
-
-		if (myAuctionListByYearMonth.containsKey(theYearMonth)) {
-			checkList = myAuctionListByYearMonth.get(theYearMonth);
-			if (theAuctionIndex <= checkList.size()) {
-				temp = checkList.get(theAuctionIndex - 1);
-			}
-		}
-
-		return temp;
-	}
-
-	/**
-	 * Copies the contents of fromList and adds them to toList.
-	 * 
-	 * @param toList
-	 * @param fromList
-	 */
-	private void copyList(ArrayList<Auction> toList, ArrayList<Auction> fromList) {
-		for (int i = 0; i < fromList.size(); i++) {
-			toList.add(fromList.get(i));
-		}
-	}
 
 	/**
 	 * Bubble sorts the list coming in and returns a list that is sorted by date.
@@ -523,40 +580,28 @@ public class MyCalendar implements Serializable{
 	 * @param toSort
 	 * @return
 	 */
-	private ArrayList<Auction> sortList(ArrayList<Auction> toSort) {
-
+	private  ArrayList<Auction> sortList(ArrayList<Auction> toSort) {
 		ArrayList<Auction> sortedList = new ArrayList<Auction>();
-		/**
-		boolean sorted = false;
 
-		//sortedList.clear();
-		if (toSort.size() > 1) {
-			for (int i = 0; i < toSort.size() && !sorted; i++) {
-				sorted = true;
-				for (int j = 0; j < toSort.size() - 1; j++) {
+			while(toSort.size()>0){
+				Auction temp = toSort.get(0);
+				int toRemove = 0;
+				for (int j = 0; j < toSort.size(); j++) {
 					if (getDaysBetween(toSort.get(j).getMyDate(), 
-							toSort.get(j + 1).getMyDate()) <= 0) {
-						sortedList.add(toSort.get(j));
-					} else {
-						sorted = false;
-						sortedList.add(toSort.get(j + 1));
-						sortedList.add(toSort.get(j));
-						j++;
+							temp.getMyDate()) < 0) {
+						temp = toSort.get(j);
+						toRemove = j;
 					}
 				}
-				toSort.clear();
-				copyList(toSort, sortedList);
-				sortedList.clear();
+				toSort.remove(toRemove);
+				sortedList.add(temp);
 			}
-		} 
-		 */
-		copyList(sortedList, toSort);
-
 		return sortedList;
+
 	}
 
 	/**
-	 * Adds the auction to the myAuctionListByYearMonth in its apporiate YearMonth.
+	 * Adds the auction to the myAuctionListByYearMonth in its appropriate YearMonth.
 	 * 
 	 * @param theCurentAuction
 	 */
@@ -568,7 +613,21 @@ public class MyCalendar implements Serializable{
 		ArrayList<Auction> newList = myAuctionListByYearMonth.get(ym);
 		newList.add(theCurentAuction);
 		//sorts list before adding it back in
+		
 		myAuctionListByYearMonth.put(ym, sortList(newList));
+	}
+
+	private void removeAuctionFromYearMonth(Auction auction){
+		YearMonth ym = parseYearMonth(auction.getMyDate());
+		if (myAuctionListByYearMonth.containsKey(ym)) {
+			ArrayList<Auction> newList = myAuctionListByYearMonth.get(ym);
+			for(int i = 0; i < newList.size(); i++){
+				if(newList.get(i).getName() == auction.getName()){
+					newList.remove(i);
+				}
+			}
+			myAuctionListByYearMonth.put(ym, newList);
+		}
 	}
 
 	/**
@@ -584,7 +643,20 @@ public class MyCalendar implements Serializable{
 		ArrayList<Auction> newList = myAuctionsByOrg.get(theCurentAuction.getMyOrg());
 		newList.add(theCurentAuction);
 		//sorts list before putting it back in.
+		
 		myAuctionsByOrg.put(theCurentAuction.getMyOrg(), sortList(newList));
+	}
+
+	private void removeAuctionFromOrgList(Auction auction){
+		if (myAuctionsByOrg.containsKey(auction.getMyOrg())) {
+			ArrayList<Auction> newList = myAuctionsByOrg.get(auction.getMyOrg());
+			for(int i = 0; i < newList.size(); i++){
+				if(newList.get(i).getName() == auction.getName()){
+					newList.remove(i);
+				}
+			}
+			myAuctionsByOrg.put(auction.getMyOrg(), newList);
+		}
 	}
 
 	/**
@@ -596,9 +668,8 @@ public class MyCalendar implements Serializable{
 	private void addAuctionToCurrentAuctions(Auction theCurentAuction) {
 		if (theCurentAuction.getMyDate().getTime() > CURRENT_DATE.getTime()) {
 			myCurrentAuctions.add(theCurentAuction);
-			ArrayList<Auction> newList = sortList((ArrayList<Auction>) myCurrentAuctions);
-			myCurrentAuctions.clear();
-			copyList((ArrayList<Auction>) myCurrentAuctions, newList);
+			ArrayList<Auction> newList = sortList(myCurrentAuctions);
+			myCurrentAuctions = newList;
 		}
 	}
 

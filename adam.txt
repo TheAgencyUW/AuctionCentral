@@ -1,3 +1,2 @@
-1 auction1 500 1000.0
-2 auction2 500 2000.0
-1 organization-00/02/2016 500 600.0
+1 auction1 1000.0
+2 auction2 2000.0

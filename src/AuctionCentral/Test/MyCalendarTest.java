@@ -20,7 +20,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testMyCalendar() {
-		MyCalendar test = new MyCalendar("calendar.txt");
+		MyCalendar test = new MyCalendar("calendar");
 		assertNotNull(test);
 	}
 
@@ -29,15 +29,15 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testAddAuctionWithGoodAuction() {
-		cal = new MyCalendar("calendar.txt");
-		int currtSize = cal.getCurrentAuctions().size();
+		cal = new MyCalendar("calendar");
+		int currtSize = cal.getSizeOfCurrentAuction();
 		try {
 			cal.addAuction(new Auction("orgName", new GregorianCalendar(2016, 0, 7).getTime(), 8, 10));
 		} catch (AddAuctionException e) {
 			//expect no catch here
 		}
 		//expect the size of current auction list increase 1
-		assertEquals(cal.getCurrentAuctions().size(), currtSize + 1);
+		assertEquals(cal.getSizeOfCurrentAuction(), currtSize + 1);
 	}
 
 
@@ -46,7 +46,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testParseYearMonth() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		YearMonth ym = cal.parseYearMonth(new GregorianCalendar(2016, 0, 7).getTime());
 		int year = ym.getYear();
 		int month = ym.getMonthValue();
@@ -60,7 +60,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testGetDayFromDate() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		//expect the correct day, 25.
 		assertEquals(cal.getDayFromDate(new GregorianCalendar(2015, 11, 25).getTime()), 25);
 	}
@@ -70,7 +70,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testGetDaysBetween() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		//expect the correct number in return: 0
 		assertEquals(cal.getDaysBetween(new GregorianCalendar(2015, 11, 25).getTime(), new GregorianCalendar(2015, 11, 25).getTime()),0);
 	}
@@ -80,7 +80,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testHasMaxAuctions_OnMaxCalendar() {
-		cal = new MyCalendar("calendar25full.txt");
+		cal = new MyCalendar("calendar25full");
 		//expect return true.
 		assertTrue(cal.hasMaxAuctions());
 	}
@@ -90,7 +90,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testHasMaxAuctions_OnNotFullCalendar() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		//expect return false.
 		assertFalse(cal.hasMaxAuctions());
 	}
@@ -100,7 +100,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testHasPassedMaxDays_OnGoodDate() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		//expect return false
 		assertFalse(cal.hasPassedMaxDays(new GregorianCalendar(2016, 0, 25).getTime()));
 	}
@@ -110,7 +110,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testHasPassedMaxDays_OnMoreThan90Days() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		//expect return false
 		assertTrue(cal.hasPassedMaxDays(new GregorianCalendar(2016, 5, 25).getTime()));
 	}
@@ -120,7 +120,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testHasMinTimeBetweenAuctions_OnGoodDate() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		assertTrue(cal.hasMinTimeBetweenAuctions(new GregorianCalendar(2015, 11, 10).getTime(), 5, 8));
 	}
 	
@@ -130,7 +130,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testHasMinTimeBetweenAuctions_OnBadDate() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		assertFalse(cal.hasMinTimeBetweenAuctions(new GregorianCalendar(2015, 11, 10).getTime(), 10, 15));
 	}
 
@@ -139,7 +139,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testHasMaxPerDay_OnFullDate() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		//expect true
 		assertTrue(cal.hasMaxPerDay(new GregorianCalendar(2016, 0, 21).getTime()));
 	}
@@ -149,7 +149,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testHasMaxPerDay_OnNotFullDate() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		//expect false
 		assertFalse(cal.hasMaxPerDay(new GregorianCalendar(2015, 11, 10).getTime()));
 	}
@@ -159,7 +159,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testHasMaxPer7Days_OnGoodDate() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		//expect false
 		assertFalse(cal.hasMaxPer7Days(new GregorianCalendar(2015, 11, 12).getTime()));
 	}
@@ -169,9 +169,9 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testHasMaxPer7Days_OnFull7Date() {
-		cal = new MyCalendar("calendar7daysFull.txt");
+		cal = new MyCalendar("calendar");
 		//expect true
-		assertTrue(cal.hasMaxPer7Days(new GregorianCalendar(2015, 11, 22).getTime()));
+		assertTrue(cal.hasMaxPer7Days(new GregorianCalendar(2016, 1, 22).getTime()));
 	}
 	
 	
@@ -181,7 +181,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testMinDaysBetweenOrgAuctions_OnGoodDate() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		//expect true
 		assertTrue(cal.minDaysBetweenOrgAuctions("Goodwill", new GregorianCalendar(2017, 11, 22).getTime()));
 	}
@@ -192,7 +192,7 @@ public class MyCalendarTest {
 	 */
 	@Test
 	public void testMinDaysBetweenOrgAuctions_OnDateWithin365() {
-		cal = new MyCalendar("calendar.txt");
+		cal = new MyCalendar("calendar");
 		//expect false
 		assertFalse(cal.minDaysBetweenOrgAuctions("Goodwill", new GregorianCalendar(2016, 10, 22).getTime()));
 	}

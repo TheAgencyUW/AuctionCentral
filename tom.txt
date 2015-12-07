@@ -1,2 +1,2 @@
-1 auction1 5.0 10.0
-2 auction2 5.0 20.0
+1 auction1 10.0
+2 auction2 20.0

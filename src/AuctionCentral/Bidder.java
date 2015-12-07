@@ -70,7 +70,7 @@ public class Bidder
 			}
 		}
 		return successful;
-	}
+	} 
 
 	/**
 	 * Junit required

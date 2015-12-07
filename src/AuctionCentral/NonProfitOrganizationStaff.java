@@ -126,9 +126,7 @@ public class NonProfitOrganizationStaff {
 			myCurrentAuction = auc;
 			myOut.println("You have successfully added a new acution.\n");
 			viewCurrentAuction();
-		} catch (HasMaxAuctionsExceptions | MinDaysNotPassedException
-				| MaxPer7DaysException | MaxPerDayException
-				| MoreTimeBetweenAuctionsException | MaxDaysPassedException e) {
+		} catch (AddAuctionException e) {
 			myOut.print(e.getMessage());
 		}
 

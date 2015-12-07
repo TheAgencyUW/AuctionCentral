@@ -4,14 +4,8 @@
 package AuctionCentral;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintStream;
-import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -56,8 +50,7 @@ public class Main {
 	 * A method to run the program AuctionCentral.
 	 */
 	private static void RunProgram() {
-		myCalendar = new MyCalendar();
-		loadCalendar();
+		myCalendar = new MyCalendar("calendar25full");
 		myIn = new Scanner(System.in);
 		while(true){	
 			PrintWelcome();
@@ -79,7 +72,7 @@ public class Main {
 	 */
 	private static void CheckInput(String theInput) {
 		if ("Q".equals(theInput)) {
-			saveCalendarState();
+			myCalendar.saveCalendarState();
 			System.exit(0);
 		} else {
 			if (myUserList.containsKey(theInput)) {
@@ -95,20 +88,7 @@ public class Main {
 
 	}
 
-	/**
-	 * 
-	 */
-	private static void saveCalendarState() {
-		try {
-			FileOutputStream fileOut = new FileOutputStream("calendar.ser");
-			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(myCalendar);
-			out.close();
-			fileOut.close();
-		} catch(IOException i){
-		
-		}
-	}
+	
 
 
 
@@ -128,6 +108,7 @@ public class Main {
 		myChecked = false;
 		switch(myCurrentUserRole){
 		case "bidder" : BidderInterface bidder = new BidderInterface(myCalendar, myCurrentUser);
+		bidder.userInterface();
 		break;
 		case "npo" 	  : NonProfitOrganizationStaff npo = new NonProfitOrganizationStaff(myCalendar, myCurrentUser);
 		npo.staffInterface();
@@ -158,42 +139,5 @@ public class Main {
 		}
 	}
 
-	/**
-	 * 
-	 */
-	private static void loadCalendar(){
-		try {
-			FileInputStream fileIn = new FileInputStream("calendar.ser");
-			ObjectInputStream in = new ObjectInputStream(fileIn);
-			myCalendar = (MyCalendar) in.readObject();
-			in.close();
-			fileIn.close();
-		} catch (ClassNotFoundException | IOException c) {
-			makeNewCalendar();
-		}
-	}
-
-	/**
-	 * 
-	 */
-	private static void makeNewCalendar() {
-		try {
-			myCalendar.addAuction(new Auction("auction1", new GregorianCalendar(2016, java.util.Calendar.JANUARY, 1).getTime(), 8, 13));
-		} catch (HasMaxAuctionsExceptions | MinDaysNotPassedException
-				| MaxPer7DaysException | MaxPerDayException
-				| MoreTimeBetweenAuctionsException | MaxDaysPassedException e) {
-			e.printStackTrace();
-		}
-		myCalendar.getAuctionFromCurrentAuctions(1).addItem("item1", "item 1 from auction 1", 5.0);
-		myCalendar.getAuctionFromCurrentAuctions(1).addItem("item2", "item 2 from auction 1", 10.0);
-		try {
-			myCalendar.addAuction(new Auction("auction2", new GregorianCalendar(2015, java.util.Calendar.DECEMBER, 25).getTime(), 9, 14));
-		} catch (HasMaxAuctionsExceptions | MinDaysNotPassedException
-				| MaxPer7DaysException | MaxPerDayException
-				| MoreTimeBetweenAuctionsException | MaxDaysPassedException e) {
-			e.printStackTrace();
-		}
-		myCalendar.getAuctionFromCurrentAuctions(2).addItem("item1", "item 1 from auction 2", 15.0);
-		myCalendar.getAuctionFromCurrentAuctions(2).addItem("item2", "item 2 from auction 2", 20.0);
-	}
+	
 }
