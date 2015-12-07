@@ -9,6 +9,9 @@ public class BidedItem{
 	String auctionName;
 	double minBid;
 	double bidPrice;
+	public double getBidPrice(){
+		return bidPrice;
+	}
 	public BidedItem(int itemID, String aucName, double minBid, double bid){
 		this.itemID = itemID;
 		this.auctionName = aucName;

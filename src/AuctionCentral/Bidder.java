@@ -61,10 +61,10 @@ public class Bidder
 	 * @param auc
 	 * @param newBid
 	 */
-	protected boolean changeBid(int itemID, String auction, double newBid){	
+	public boolean changeBid(int itemID, String auction, double newBid){	
 		boolean successful = false;
 		for(int j = 0; j < myBidList.size(); j++){
-			if(myBidList.get(j).auctionName == auction && myBidList.get(j).itemID == itemID && newBid > myBidList.get(itemID).minBid){
+			if(myBidList.get(j).auctionName == auction && myBidList.get(j).itemID == itemID && newBid > myBidList.get(j).minBid){
 				myBidList.get(j).bidPrice = newBid;
 				successful = true;
 			}
@@ -81,7 +81,7 @@ public class Bidder
 	 * @param item
 	 * @param auction
 	 */
-	protected void cancelBid(int itemID, String auc)
+	public void cancelBid(int itemID, String auc)
 	{
 		for(int i = 0; i < myBidList.size(); i++){
 			if(myBidList.get(i).auctionName == auc && myBidList.get(i).itemID == itemID){
@@ -95,7 +95,7 @@ public class Bidder
 	 * 
 	 * add an item to the bidder's bid list
 	 */
-	protected void enterBid(int item, String auc, double min, double bid)
+	public void enterBid(int item, String auc, double min, double bid)
 	{
 		BidedItem bidedItem = new BidedItem(item, auc, min, bid);
 		myBidList.add(bidedItem);
