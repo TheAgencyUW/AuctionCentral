@@ -32,14 +32,16 @@ public class AuctionCentralEmployee {
 	/** A printstream for a shortcut to print out to the console.*/
 	private static PrintStream myOut ;
 	
-	private String breakLine = "-----------------------------------------------------------------------------------------\n";
-
+	/** */
+	private Auction myCurrentAuction;
+	
 	/**
 	 * Constructor.
 	 */
 	public AuctionCentralEmployee(MyCalendar calendar, String name) {
 		myCalendar = calendar;
 		employeeName = name;
+		myCurrentAuction = null;
 		myOut = new PrintStream(System.out, true);
 		myIn = new Scanner(System.in);
 	}
@@ -63,7 +65,6 @@ public class AuctionCentralEmployee {
 			myOut.println("Please enter a command:\n0:log out\n1: view a monthly calendar.\n"
 					+ "2: view the list of auctions\n");
 			input = myIn.next();
-			myOut.print(breakLine);
 			if(input.equals("0")){	//break the while loop, end ACE_Interface(), return control back to main class.
 				back = true;
 			}else if(input.equals("1")){
@@ -102,11 +103,10 @@ public class AuctionCentralEmployee {
 			
 			if(choice == 0){	
 				back = true;
-			}else if(choice <= myCalendar.getCurrentAuctions().size()){
-				int auction = choice -1;	//save selected auction.
-
+			}else if(choice <= myCalendar.getSizeOfCurrentAuction()){
+				myCurrentAuction = myCalendar.getAuctionFromCurrentAuctions(choice);
 				//sub menu, view list of items and ask user to select item to bid.
-				viewItemList(auction);
+				viewItemList();
 			}else{
 				myOut.print("Cannot find your selection, please try again.\n");
 			}
@@ -122,16 +122,15 @@ public class AuctionCentralEmployee {
 	 * 
 	 * print to console the list of the items of the auction.
 	 * ask the bidder to select an item by item ID to view the item's detail and place bid,
-	 * @param auction, the auction where the items belong.
 	 */
-	public void viewItemList(int auction){
+	public void viewItemList(){
+		//Auction currentAuction = myCalendar.getAuctionFromCurrentAuctions(auction);
 		
-			myOut.println("List of items for auction " + myCalendar.getCurrentAuctions().get(auction).getName() + "\n");
-			myOut.println(myCalendar.getCurrentAuctions().get(auction).retrieveItemList());
-			
-			myOut.println("\nPlease enter any key to go back to the auctions list.\n");
-			myIn.next();	
-			myOut.print(breakLine);
+		myOut.println("List of items for auction " + myCurrentAuction.getName() + "\n");
+		myOut.println(myCurrentAuction.retrieveItemList());
+		
+		myOut.println("\nPlease enter any key to go back to the auctions list.\n");
+		myIn.next();			
 	}
 
 	/**
@@ -163,7 +162,6 @@ public class AuctionCentralEmployee {
 		boolean validInput = false;
 		while(!validInput){
 			input = myIn.next();
-			myOut.print(breakLine);
 			try{
 				toreturn = Integer.parseInt(input);
 				validInput = true;
