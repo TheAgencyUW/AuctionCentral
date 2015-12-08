@@ -19,6 +19,6 @@ public class BidedItem{
 		this.bidPrice = bid;
 	}
 	public String toString(){
-		return "Item ID: " + itemID + " from auction " + auctionName + "minimum bid: " + minBid + ", bided value: " + bidPrice +"\n";
+		return "Item ID: " + itemID + " from auction " + auctionName + ", minimum bid: " + minBid + ", bided value: " + bidPrice +"\n";
 	}
 }

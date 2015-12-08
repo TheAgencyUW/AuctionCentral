@@ -29,6 +29,8 @@ public class NonProfitOrganizationStaff {
 
 	/** A print stream for a shortcut to print out to the console.*/
 	private static PrintStream myOut ;
+	
+	private String breakLine = "-----------------------------------------------------------------------------------------\n";
 
 	/**
 	 * Holds the calendar for use by ACE.
@@ -88,6 +90,7 @@ public class NonProfitOrganizationStaff {
 			myOut.println("Please enter a command:\n0:log out\n1: schedule new auction.\n"
 					+ "2: view the current auction.\n");
 			input = myIn.next();
+			myOut.println(breakLine);
 			if(input.equals("0")){	//break the while loop, end NPO_Interface(), return control back to main class.
 				back = true;
 			}else if(input.equals("1")){
@@ -206,6 +209,7 @@ public class NonProfitOrganizationStaff {
 				myOut.println("Please enter a command:\n0: go back.\n1: edit auction infomation.\n"
 						+ "2: add new item.\n3: view current items");
 				input = myIn.next();
+				myOut.println(breakLine);
 				if(input.equals("0")){	
 					back = true;
 				}else if(input.equals("1")){
@@ -231,6 +235,7 @@ public class NonProfitOrganizationStaff {
 			myOut.println("Please enter a command:\n0: go back.\n1: edit auction date.\n"
 					+ "2: edit auction start time.\n3: edit auction endtime");
 			input = myIn.next();
+			myOut.println(breakLine);
 			if(input.equals("0")){	
 				back = true;
 			}else if(input.equals("1")){
@@ -287,6 +292,7 @@ public class NonProfitOrganizationStaff {
 		String toReturn = "";
 		try {
 			toReturn = br.readLine();
+			myOut.println(breakLine);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -303,6 +309,7 @@ public class NonProfitOrganizationStaff {
 		boolean validInput = false;
 		while(!validInput){
 			input = myIn.next();
+			myOut.println(breakLine);
 			try{
 				toreturn = Double.parseDouble(input);
 				validInput = true;
@@ -323,6 +330,7 @@ public class NonProfitOrganizationStaff {
 		boolean validInput = false;
 		while(!validInput){
 			input = myIn.next();
+			myOut.println(breakLine);
 			try{
 				toreturn = Integer.parseInt(input);
 				validInput = true;
@@ -371,6 +379,7 @@ public class NonProfitOrganizationStaff {
 			myOut.println("Please enter a command:\n0: go back.\n1: edit item name.\n"
 					+ "2: edit item description.\n3: edit item min bid");
 			input = myIn.next();
+			myOut.println(breakLine);
 			if(input.equals("0")){	
 				back = true;
 			}else if(input.equals("1")){

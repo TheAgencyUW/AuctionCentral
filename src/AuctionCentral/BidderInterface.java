@@ -25,6 +25,8 @@ public class BidderInterface
 	 * the console.
 	 * */
 	private static Scanner myIn;
+	
+	private String breakLine = "-----------------------------------------------------------------------------------------\n";
 
 	//To store the calendar which contents all the auction passing from main.
 	private MyCalendar myCalendar;
@@ -87,6 +89,7 @@ public class BidderInterface
 			myOut.println("Welcome " + bidder.getBidderName());
 			myOut.println("Please enter a command:\n0:log out\n1: view bided items and make change\n2: view current auctions.\n");
 			input = myIn.next();
+			myOut.println(breakLine);
 			if(input.equals("0"))
 			{	//break the while loop, end bidderInterface(), return control back to main class.
 				logout(bidder.getBidderName());
@@ -255,6 +258,8 @@ public class BidderInterface
 				try {
 					myCurrentAuction.getItem(item.getId()).addBid(bidder.getBidderName(), bid);
 					bidder.enterBid(item.getId(), myCurrentAuction.getName(), item.getMinBid(), bid);
+					myOut.print("You have placed bid successful for item: " + item.getId()
+							+ ", your bid value: " + bid + "\n");
 					break;
 				} catch (PlaceBidException e) {
 					myOut.println(e.getMessage());
@@ -277,6 +282,7 @@ public class BidderInterface
 		boolean validInput = false;
 		while(!validInput){
 			input = myIn.next();
+			myOut.println(breakLine);
 			try{
 				toreturn = Double.parseDouble(input);
 				validInput = true;
@@ -297,6 +303,7 @@ public class BidderInterface
 		boolean validInput = false;
 		while(!validInput){
 			input = myIn.next();
+			myOut.println(breakLine);
 			try{
 				toreturn = Integer.parseInt(input);
 				validInput = true;
